@@ -1,51 +1,58 @@
 # SOL work packet — active
 
-**Packet:** tracker-#1 · issued 2026-07-17 · authored by Claude (planning side)
-**Protocol:** see `AGENTS.md` (same contract as olimazi-online). Direct-change authority within scope only.
+**Packet:** tracker-#2 · issued 2026-07-17 · authored by Claude (planning side)
+**Protocol:** see `AGENTS.md`. Direct-change authority within scope only.
 
-## Context
+**Packet tracker-#1: ACCEPTED.** Review notes: fixture + engine run reproduced exactly
+on the planning side; SETUP.md cold-tested — the python.org link was wrong
+(downloads/windows has no big button; fixed to /downloads), the `py` launcher and
+PowerShell address-bar steps verified on a real Windows machine, all `[VERIFY]` tags
+now cleared. Your "John's" wording catch was correct and has been fixed. Your fixture
+regression-check proposal is folded into this packet (item 3).
 
-This repo holds the sanitized public engine of the Olimazi finance tracker. The four
-scripts in `engine/` were lifted from a working private system and scrubbed of personal
-data; they run but have never been exercised against fixture data in this repo. Your
-job is to make the repo self-demonstrating.
+## Packet tracker-#2 scope — the intake skill
 
-## Packet tracker-#1 scope
+Build `skill/olimazi-setup/` — the conversational first-run setup that turns this repo
+from a demo into someone's own tracker. Model it on the interview→config pattern:
+discover with tools where possible, ask the user only to confirm, write everything to
+a config that later runs read.
 
-### 1. Build the fixture generator
-Create `fixtures/make_fixture.py` (Python 3 + openpyxl only): generates
-`fixtures/sample-property/sample-tracker.xlsx` — the fake "12 Sample Street" rental —
-conforming to `docs/LAYOUT-SPEC.md` (the spec defers to `engine/reconcile.py`; read the
-code, the code wins). Include: 4 months of actual rent + projections, 6–10 expense rows
-across at least L9/L10/L14/L16 with exact em-dash labels, one negative reimbursement
-contra row with an `ACCOUNTANT REVIEW:` note, a few file references pointing at small
-placeholder PDFs/text files you also generate, at least one intentionally-dangling file
-reference, and a Review tab with 3 open + 2 resolved items. Formulas only in the
-Summary tab — no cached values.
+### 1. `skill/olimazi-setup/SKILL.md`
+Frontmatter (name, description with trigger phrases like "set up my tracker",
+"add a property", "start tracking my rental/business") + the run procedure:
+- If `profile.json` exists in the property folder → summarize it and offer to
+  reconcile instead of re-interviewing.
+- Otherwise read `references/setup.md` and run the interview.
+- End every setup with the read-only dry run: generate the property folder, run
+  `engine/reconcile.py` on it, show the user their empty-but-working dashboard.
 
-### 2. Prove the engine runs on it
-Run `python engine/reconcile.py "fixtures/sample-property"` . Target state: all checks
-executed, with exactly the breaks the fixture intends (the dangling reference) — i.e.
-exit code 1, and the generated `SchE_Dashboard.html` + reconciliation report land in
-the fixture folder. Commit the generated dashboard/report as demo artifacts. If the
-engine crashes on the fixture, fix the FIXTURE first; only patch `engine/` if the code
-itself is broken in a way the private system can't be (note any engine patch
-prominently in REPORT.md — the planning side must mirror it to the private system).
+### 2. `skill/olimazi-setup/references/setup.md`
+The interview. Sections:
+- **What are we tracking?** Rental property (Schedule E) or a small business
+  (Schedule C — note the engine's Sch C support is still being adapted; set
+  expectations honestly). Name/address of the property or business.
+- **Which schedule lines apply?** Walk the common lines (insurance, repairs,
+  professional fees, taxes, etc.); record which apply so the dashboard can
+  grey out the rest. Owned outright vs mortgage (Line 12 n/a pattern).
+- **Where do documents arrive?** Drop folder location(s); email note for later
+  (email intake is a future packet — record the address, don't wire it).
+- **Scaffold** via `engine/new_area_setup.py` + a fresh workbook from the fixture
+  generator's layout (reuse `fixtures/make_fixture.py` structure with the user's real
+  property name and EMPTY data rows — factor a shared helper if that avoids
+  duplicating layout code, but keep make_fixture.py's demo behavior unchanged).
+- **Write `profile.json`** (property name, type, applicable lines, folders,
+  anticipated-items placeholders) and confirm with the dry run.
 
-### 3. Draft the setup guide
-Write `docs/SETUP.md` for a **non-technical reader** (think: someone who has never
-opened a terminal). Plain English, zero jargon, numbered steps, one install path
-(Windows first), a "what this is NOT" box (mirroring DISCLAIMER.md), and a 5-minute
-smoke test that ends with the reader seeing the sample dashboard in their browser.
-Where a step can't be verified from this repo alone (e.g. exact Python installer
-screens), write it best-effort and mark it `[VERIFY]` — the planning side will test
-the guide cold on a real Windows machine.
+### 3. Fixture regression check (your proposal, accepted)
+`fixtures/check_fixture.py`: regenerates the workbook, runs the reconciler,
+asserts exit 1 / exactly one failure / the missing locksmith reference. Plain
+Python, no new dependencies. Add one line to README pointing at it.
 
 ### 4. Report
-Overwrite `sol/REPORT.md`: files added, engine-run output (paste the check summary),
-any engine patches, `[VERIFY]` list from the guide, proposals.
+Overwrite `sol/REPORT.md`: files, how you tested the interview flow end-to-end
+(walk a fake user through it in your report), regression-check output, proposals.
 
 ## Out of scope
-- Changing engine guardrails or the deterministic design (see AGENTS.md)
-- Real data of any kind; new dependencies beyond Python 3 + openpyxl
-- Packaging/releases, licensing changes, this file
+- Email intake wiring, scheduled tasks, packaging/releases
+- Engine guardrail changes; real data; dependencies beyond Python 3 + openpyxl
+- This file

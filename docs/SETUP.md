@@ -14,11 +14,12 @@ own records.
 ## Part 1 — Install Python
 
 1. Open your web browser and go to
-   [python.org/downloads/windows](https://www.python.org/downloads/windows/).
-2. Choose the main **Download Python 3** button. `[VERIFY]`
+   [python.org/downloads](https://www.python.org/downloads/).
+2. Choose the big yellow **Download Python 3** button near the top. (Ignore anything
+   about a "Python install manager" — the plain download is what you want.)
 3. Open the downloaded installer.
 4. Before choosing **Install Now**, select **Add python.exe to PATH** near the bottom
-   of the installer window. `[VERIFY]`
+   of the installer window.
 5. Finish the installation, then close the installer.
 
 ## Part 2 — Download the tracker
@@ -35,7 +36,6 @@ own records.
 1. While viewing the `olimazi-tracker-main` folder, click the folder address at the
    top of File Explorer.
 2. Type `powershell` and press Enter. A blue command window should open in that folder.
-   `[VERIFY]`
 3. Copy the line below, paste it into the blue window, and press Enter:
 
    ```powershell
@@ -91,7 +91,7 @@ the reconciler replaces the report and dashboard. Neither step sends data anywhe
 ## If a command does not work
 
 - If Windows says `py` is not recognized, restart the computer once and try again.
-  If it still fails, repeat Part 1 and confirm the PATH option. `[VERIFY]`
+  If it still fails, repeat Part 1 and confirm the PATH option.
 - If the workbook is open in Excel, close Excel before repeating the commands.
 - If the browser does not open, find `SchE_Dashboard.html` inside
   `fixtures\sample-property` and double-click it.

@@ -7,7 +7,7 @@ then re-runs reconcile.py so the dashboard/report regenerate from the books.
 
 Design rules (match the system's hard rules):
 - Localhost only. The ONLY cell this server ever writes is the Status column (E)
-  of an OPEN row on the Review tab — a click in the UI is John's explicit
+  of an OPEN row on the Review tab — a click in the UI is the owner's explicit
   confirmation for that one write. Nothing else in the workbook is touchable.
 - A rolling pre-write backup (master-tracker.pre-resolve-backup.xlsx) is saved
   next to the tracker before every write ("backup" in the name keeps it out of
