@@ -29,12 +29,13 @@ own records.
 3. Open your Downloads folder.
 4. Right-click the downloaded ZIP file, choose **Extract All**, and accept the
    suggested location.
-5. Open the extracted `olimazi-tracker-main` folder.
+5. Open the extracted `olimazi-tracker` folder. If you used GitHub's **Code** →
+   **Download ZIP** instead of the versioned release, open `olimazi-tracker-main`.
 
 ## Part 3 — Install the one required helper
 
-1. While viewing the `olimazi-tracker-main` folder, click the folder address at the
-   top of File Explorer.
+1. While viewing the extracted tracker folder, click the folder address at the top of
+   File Explorer.
 2. Type `powershell` and press Enter. A blue command window should open in that folder.
 3. Copy the line below, paste it into the blue window, and press Enter:
 
