@@ -50,7 +50,7 @@
     {
       "type": "Missing data",
       "item": "Sample Locksmith receipt",
-      "action": "Locate the receipt or remove the file reference.",
+      "action": "Locate the receipt and paste its path into File Reference.",
       "status": "Open",
       "resolved": false,
       "row": 5
@@ -99,16 +99,16 @@
   "line3_rents_ytd": 7150.0,
   "line9_insurance": 1200.0,
   "line10_professional": 350.0,
-  "line14_repairs": 630.0,
-  "total_expenses": 3530.0,
-  "net_income_as_booked": 3620.0,
+  "line14_repairs": 775.0,
+  "total_expenses": 3675.0,
+  "net_income_as_booked": 3475.0,
   "reimbursement": {
     "amount": 300.0,
     "booked": true,
     "evidence": "Insurance allocation Reimbursement received $300.00 Claim SAMPLE-001 proceeds are booked as a negative Line 14 contra row. Ask the preparer to confirm the treatment. Open"
   },
-  "net_income_corrected": 3620.0,
-  "fails": 1,
+  "net_income_corrected": 3475.0,
+  "fails": 0,
   "warns": 1,
   "checks": [
     {
@@ -119,7 +119,7 @@
     {
       "name": "Expenses: category lines sum to Paid-YTD total",
       "status": "PASS",
-      "detail": "Sum of L-line categories $3,530.00 vs sum of all Paid-YTD $3,530.00."
+      "detail": "Sum of L-line categories $3,675.00 vs sum of all Paid-YTD $3,675.00."
     },
     {
       "name": "Excel SUMIF strings match canonical labels (em-dash exact)",
@@ -128,8 +128,8 @@
     },
     {
       "name": "File references resolve to real files on disk",
-      "status": "FAIL",
-      "detail": "Dangling File References (the document isn't where the tracker says): row 12 (Sample Locksmith): source-docs/missing-locksmith-receipt.pdf"
+      "status": "PASS",
+      "detail": "Every File Reference points to an existing file."
     },
     {
       "name": "Insurance reimbursement is booked",

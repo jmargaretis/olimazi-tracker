@@ -159,7 +159,7 @@ def build_expenses(wb: Workbook) -> None:
     style_title(
         ws,
         "12 Sample Street — 2026 Expenses",
-        "Fake source references are relative to this fixture folder. One missing receipt is intentional.",
+        "Fake source references are relative to this fixture folder. Two empty references test receipt matching.",
         "J",
     )
     ws.append(["Property", "12 Sample Street", "Tax year", 2026])
@@ -273,20 +273,32 @@ def build_expenses(wb: Workbook) -> None:
             95,
             0,
             "Paid",
-            "source-docs/missing-locksmith-receipt.pdf",
-            "Intentionally dangling file reference for the demo reconciliation.",
+            "",
+            "Intentionally unlinked; its receipt genuinely does not exist.",
+        ],
+        [
+            date(2026, 4, 10),
+            "Sample Electric",
+            "Replace porch light fixture",
+            "L14 — Repairs",
+            145,
+            145,
+            0,
+            "Paid",
+            "",
+            "Intentionally unlinked; its matching receipt exists in source-docs.",
         ],
     ]
     for row in rows:
         ws.append(row)
-    style_body(ws, 5, 12, 1, 10)
-    for row in range(5, 13):
+    style_body(ws, 5, 13, 1, 10)
+    for row in range(5, 14):
         ws.cell(row, 1).number_format = "yyyy-mm-dd"
         for column in (5, 6, 7):
             ws.cell(row, column).number_format = '$#,##0.00;[Red]($#,##0.00);-'
             ws.cell(row, column).alignment = Alignment(horizontal="right")
     ws.conditional_formatting.add(
-        "J5:J12",
+        "J5:J13",
         FormulaRule(
             formula=['ISNUMBER(SEARCH("ACCOUNTANT REVIEW",J5))'],
             fill=PatternFill("solid", fgColor="FFF2CC"),
@@ -401,8 +413,8 @@ def build_review(wb: Workbook) -> None:
         [
             "Missing data",
             "Sample Locksmith receipt",
-            "The tracker points to a file that is not present.",
-            "Locate the receipt or remove the file reference.",
+            "No matching receipt is available for the expense row.",
+            "Locate the receipt and paste its path into File Reference.",
             "Open",
         ],
         [
@@ -489,6 +501,10 @@ def write_source_documents() -> None:
     write_placeholder_pdf(
         SOURCE_DOCS / "reimbursement-notice.pdf",
         "FAKE: Claim SAMPLE-001 reimbursement received - $300.00",
+    )
+    write_placeholder_pdf(
+        SOURCE_DOCS / "2026-04-10_sample-electric_145.pdf",
+        "FAKE: Sample Electric receipt - 12 Sample Street - $145.00",
     )
     dangling = SOURCE_DOCS / "missing-locksmith-receipt.pdf"
     if dangling.exists():

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "tracker": "sample-tracker.xlsx",
+  "proposals": [
+    {
+      "row": 13,
+      "vendor": "Sample Electric",
+      "date": "2026-04-10",
+      "amount": 145.0,
+      "file": "source-docs/2026-04-10_sample-electric_145.pdf",
+      "paste_value": "source-docs/2026-04-10_sample-electric_145.pdf",
+      "score": 3,
+      "evidence": [
+        "date 2026-04-10 from filename is 0 day(s) from row date",
+        "filename contains amount 145",
+        "filename contains row token(s): electric"
+      ]
+    }
+  ],
+  "ambiguous": [],
+  "misses": [
+    {
+      "row": 12,
+      "vendor": "Sample Locksmith",
+      "date": "2026-04-05",
+      "amount": 95.0,
+      "miss_count": 2
+    }
+  ]
+}

@@ -2,84 +2,116 @@
 
 ## Files changed
 
-- `skill/olimazi-setup/SKILL.md` — first-run and resume procedure, including the
-  mandatory read-only reconciliation dry run.
-- `skill/olimazi-setup/references/setup.md` — confirmation-first interview for tracker
-  type, schedule lines, mortgage status, document folders, and recorded-only email.
-- `skill/olimazi-setup/agents/openai.yaml` — generated skill-list metadata.
-- `engine/new_area_setup.py` — self-contained rental/business scaffold that refuses
-  overwrite, creates an empty workbook, preserves the copy-only intake scanner, and
-  writes `profile.json`.
-- `fixtures/make_fixture.py` — reusable `build_empty_workbook()` path; the existing
-  `build_workbook()` demonstration behavior is unchanged.
-- `engine/reconcile.py` — read-only `profile.json` support for tracker name/type and
-  applicable-line display. Arithmetic and source-data guardrails are unchanged.
-- `fixtures/check_fixture.py` — isolated fixture regression check.
-- `fixtures/sample-property/` generated workbook, JSON, report, and dashboard —
-  regenerated from fake data to match the current generator and reconciler.
-- `README.md` — one-line regression-check command.
+- `engine/match_receipts.py` — propose-only receipt matcher with conservative scoring,
+  ambiguity refusal, persistent miss counts, and human/machine outputs.
+- `fixtures/make_fixture.py` — adds one matchable unlinked Sample Electric expense and
+  keeps the genuinely missing Sample Locksmith expense as an empty File Reference.
+- `fixtures/check_fixture.py` — validates the proposal, miss escalation, ambiguity
+  refusal, clean reconciliation, and unchanged workbook hash.
+- `fixtures/sample-property/sample-tracker.xlsx` — regenerated fake workbook.
+- `fixtures/sample-property/source-docs/2026-04-10_sample-electric_145.pdf` — fake
+  uniquely matchable receipt.
+- `fixtures/sample-property/MatchProposals.md` and `match_state.json` — generated
+  matcher outputs after two fixture runs.
+- `fixtures/sample-property/SchE_Dashboard.html`, `SchE_Reconciliation.md`, and
+  `reconciliation.json` — regenerated deterministic outputs.
 
-## Fake interview walkthrough
+The locksmith row's previous dangling File Reference was cleared so it obeys the
+packet's eligibility rule: the matcher examines rows whose File Reference cell is empty.
+The reconciler therefore now exits `0`; the missing receipt is tracked in matcher state
+instead of masquerading as a workbook link.
 
-I walked a fake user through a rental setup using only `12 Sample Street`:
-
-1. Tracking type: rental / Schedule E.
-2. Display name: `12 Sample Street`.
-3. Applicable lines: 3, 9, 10, 14, and 16.
-4. Mortgage: no; Line 12 remained unselected.
-5. Document arrival: a temporary fake local folder.
-6. Email: `records@example.invalid`, recorded with status `recorded_only`; no mailbox
-   was connected.
-7. Scaffold command exited `0` and created `profile.json`, `tracker.xlsx`, the
-   copy-only intake scanner, and the standard folders outside the repository.
-8. `engine/reconcile.py` exited `0`: 8 checks, 0 failures, 0 warnings, $0.00 net
-   income, and an empty working dashboard.
-9. A second invocation against the same destination exited `1` and refused to
-   overwrite it.
-10. The generated intake scanner compiled and its `--dry-run` exited `0` without
-    capturing or modifying any source files.
-
-I also ran a fake business setup. It exited `0`, recorded
-`schedule_c_setup_preview`, displayed the Schedule C preview warning, and produced the
-structural empty dashboard without claiming completed Schedule C line support.
-
-## Workbook and skill verification
-
-- Skill validator: `Skill is valid!`
-- Python compile check: passed for the scaffolder, reconciler, generator, and fixture
-  regression script.
-- Workbook inspection: four expected tabs; formulas only on `Sch. E Summary`; no
-  formula-error strings found.
-- Visual render: all four tabs inspected; empty entry rows, headers, validations, and
-  muted non-applicable lines were legible.
-- Dashboard applicability check: an omitted Line 10 rendered with the `not selected`
-  label and inactive styling.
-- Data-hygiene scan: no new personal or financial data; all committed examples remain
-  fake `12 Sample Street` data.
-
-## Fixture regression output
+## Matcher output from the fixture
 
 ```text
-Fixture regression: PASS
-  reconcile exit: 1
-  failures: 1
-  intended missing reference: missing-locksmith-receipt.pdf
+Receipt matcher: 1 proposal(s), 0 ambiguous, 1 miss(es)
+  Proposals: fixtures/sample-property/MatchProposals.md
 ```
 
-The regression runs in a temporary isolated tree, so it does not dirty the committed
-sample workbook.
+```markdown
+## Need from you
 
-## Skipped
-
-- Email intake wiring, scheduled tasks, packaging, and releases were out of scope.
-- No live user data was used and no tracker generated during the walkthrough is being
-  committed.
+- Expenses row 12: **Sample Locksmith** · 2026-04-05 · $95.00
+  (2 searches with no match)
 
 ## Proposals
 
-- Complete a native Schedule C workbook/line map and use Schedule C-specific output
-  filenames in a future packet. The current business path is intentionally labeled as
-  a setup preview.
-- In a future cleanup packet, remove the now-unused legacy external-project scaffold
-  branch from `engine/new_area_setup.py` after confirming no older installation still
-  invokes it.
+### Expenses row 13 — Sample Electric — $145.00
+
+- Proposed file: `source-docs/2026-04-10_sample-electric_145.pdf`
+- Evidence: date 2026-04-10 from filename is 0 day(s) from row date;
+  filename contains amount 145; filename contains row token(s): electric
+- Human action: paste `source-docs/2026-04-10_sample-electric_145.pdf`
+  into the File Reference cell.
+
+## Ambiguous
+
+_None._
+```
+
+The tool did not accept the proposal or write the path into the workbook.
+
+## Workbook hash proof
+
+The committed fixture was generated, reconciled, and then matched twice:
+
+```text
+workbook_sha256_before=f9d4573a57e699c1d8d27e84928bfdb3dcf97a3130976aa479345f4194991d00
+workbook_sha256_after =f9d4573a57e699c1d8d27e84928bfdb3dcf97a3130976aa479345f4194991d00
+workbook_hash_unchanged=True
+```
+
+The isolated regression also compares SHA-256 before and after every matcher scenario.
+
+## Verification
+
+`python fixtures/check_fixture.py`:
+
+```text
+Fixture regression: PASS
+  reconcile exit: 0; failures: 0
+  matcher: 1 proposal, 0 ambiguous, 1 miss
+  proposal: source-docs/2026-04-10_sample-electric_145.pdf
+  miss after two runs: Sample Locksmith (Need from you)
+  ambiguity rule: 2 plausible files -> 0 proposals, 1 ambiguous
+  workbook sha256 unchanged: 394c578977d080b819ce4c251d5755c357cd96659f016e81a6b94237c09369ef
+```
+
+Additional checks:
+
+- Python compile check passed for the matcher, fixture generator, and regression test.
+- Workbook inspection found both empty File Reference cells and no formula-error strings.
+- The Expenses tab was visually rendered; the new rows match existing styles and remain
+  legible.
+- Data-hygiene scan found no new personal or financial data; all fixtures remain fake
+  `12 Sample Street` data.
+
+## Edge cases considered
+
+- A filename date exactly five days away is allowed, but cannot create a proposal by
+  itself.
+- Generic tokens such as `sample`, `receipt`, and `repair` do not count as vendor
+  evidence.
+- Negative amounts are compared by absolute value.
+- ISO dates with separators or compact `YYYYMMDD` are parsed; otherwise modified time
+  is used.
+- Missing or invalid `profile.json` is treated as no external document folders.
+- Missing external folders are skipped; overlapping folders are deduplicated.
+- Generated dashboards, reconciliation outputs, and prior matcher outputs are excluded
+  from candidates.
+- More than one candidate scoring at least two signals produces zero proposals and an
+  `ambiguous` entry listing every plausible file.
+- If a row's identifying vendor/date/amount changes, its miss count restarts instead of
+  inheriting stale state from the old row.
+
+## Skipped
+
+- No `.xlsx` writes, proposal acceptance, file moves/renames/deletes, email search,
+  packaging, or new dependencies were added.
+
+## Proposals
+
+- A future explicitly confirmed acceptance workflow could paste a selected proposal
+  into File Reference while preserving a separate audit trail.
+- A future OCR/metadata packet could add document-content signals for receipts whose
+  filenames contain no useful date, amount, or vendor tokens.
