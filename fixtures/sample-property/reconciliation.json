@@ -1,0 +1,109 @@
+{
+  "generated": "2026-07-17",
+  "open_items": [
+    {
+      "type": "Missing data",
+      "item": "Sample Locksmith receipt",
+      "action": "Locate the receipt or remove the file reference.",
+      "status": "Open",
+      "resolved": false,
+      "row": 5
+    },
+    {
+      "type": "Insurance allocation",
+      "item": "Reimbursement received $300.00",
+      "action": "Ask the preparer to confirm the treatment.",
+      "status": "Open",
+      "resolved": false,
+      "row": 6
+    },
+    {
+      "type": "Filing question",
+      "item": "Fair rental days",
+      "action": "Confirm the day count before filing.",
+      "status": "Open",
+      "resolved": false,
+      "row": 7
+    },
+    {
+      "type": "Document",
+      "item": "2026 sample lease",
+      "action": "No action needed.",
+      "status": "Resolved \u2014 fixture review complete",
+      "resolved": true,
+      "row": 8
+    },
+    {
+      "type": "Income",
+      "item": "January rent deposit",
+      "action": "No action needed.",
+      "status": "Resolved \u2014 fixture review complete",
+      "resolved": true,
+      "row": 9
+    }
+  ],
+  "anticipated": null,
+  "accountant_review": [
+    {
+      "where": "Expenses row 11",
+      "item": "Sample Mutual \u2014 $-300.00",
+      "note": "Confirm the negative repair contra treatment with the preparer."
+    }
+  ],
+  "line3_rents_ytd": 7150.0,
+  "line9_insurance": 1200.0,
+  "line10_professional": 350.0,
+  "line14_repairs": 630.0,
+  "total_expenses": 3530.0,
+  "net_income_as_booked": 3620.0,
+  "reimbursement": {
+    "amount": 300.0,
+    "booked": true,
+    "evidence": "Insurance allocation Reimbursement received $300.00 Claim SAMPLE-001 proceeds are booked as a negative Line 14 contra row. Ask the preparer to confirm the treatment. Open"
+  },
+  "net_income_corrected": 3620.0,
+  "fails": 1,
+  "warns": 1,
+  "checks": [
+    {
+      "name": "Income: YTD (Jan-Apr) == sum of 'Actual' months",
+      "status": "PASS",
+      "detail": "YTD net $7,150.00 vs Actual-flagged months $7,150.00. Summary Line 3 links to Income!D19 (Jan-Apr)."
+    },
+    {
+      "name": "Expenses: category lines sum to Paid-YTD total",
+      "status": "PASS",
+      "detail": "Sum of L-line categories $3,530.00 vs sum of all Paid-YTD $3,530.00."
+    },
+    {
+      "name": "Excel SUMIF strings match canonical labels (em-dash exact)",
+      "status": "PASS",
+      "detail": "All expense labels match the exact SUMIF text."
+    },
+    {
+      "name": "File references resolve to real files on disk",
+      "status": "FAIL",
+      "detail": "Dangling File References (the document isn't where the tracker says): row 12 (Sample Locksmith): source-docs/missing-locksmith-receipt.pdf"
+    },
+    {
+      "name": "Insurance reimbursement is booked",
+      "status": "PASS",
+      "detail": "No outstanding received-but-unbooked reimbursement detected."
+    },
+    {
+      "name": "No unexplained open balances on Expenses",
+      "status": "PASS",
+      "detail": "All contracted amounts fully paid (Balance = 0)."
+    },
+    {
+      "name": "No unallocated/TBD expense rows",
+      "status": "PASS",
+      "detail": "No TBD expense rows."
+    },
+    {
+      "name": "Accountant-review queue is clear",
+      "status": "WARN",
+      "detail": "1 item(s) flagged for a preparer to confirm: Sample Mutual \u2014 $-300.00"
+    }
+  ]
+}
