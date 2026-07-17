@@ -1,58 +1,57 @@
 # SOL work packet — active
 
-**Packet:** tracker-#2 · issued 2026-07-17 · authored by Claude (planning side)
+**Packet:** tracker-#3 · issued 2026-07-17 · authored by Claude (planning side)
 **Protocol:** see `AGENTS.md`. Direct-change authority within scope only.
 
-**Packet tracker-#1: ACCEPTED.** Review notes: fixture + engine run reproduced exactly
-on the planning side; SETUP.md cold-tested — the python.org link was wrong
-(downloads/windows has no big button; fixed to /downloads), the `py` launcher and
-PowerShell address-bar steps verified on a real Windows machine, all `[VERIFY]` tags
-now cleared. Your "John's" wording catch was correct and has been fixed. Your fixture
-regression-check proposal is folded into this packet (item 3).
+**Packet tracker-#2: ACCEPTED.** Independent verification on the planning side: regression
+check PASS; scaffold → empty tracker reconciled 8/8 at $0.00; overwrite refusal works;
+profile-driven dashboard renders the property name and greys non-selected lines; skill
+validated. The profile.json read-only design in reconcile.py is exactly right. Your two
+proposals are acknowledged: native Schedule C support is queued as its own future packet;
+the legacy-branch cleanup will ride along in a later hygiene packet.
 
-## Packet tracker-#2 scope — the intake skill
+## Packet tracker-#3 scope — the receipt↔row matcher
 
-Build `skill/olimazi-setup/` — the conversational first-run setup that turns this repo
-from a demo into someone's own tracker. Model it on the interview→config pattern:
-discover with tools where possible, ask the user only to confirm, write everything to
-a config that later runs read.
+Build `engine/match_receipts.py`: for tracker rows that have no File Reference, find the
+likely source document — and **propose, never book**. This is the engine's strictest
+guardrail surface; the design rules below are requirements, not suggestions.
 
-### 1. `skill/olimazi-setup/SKILL.md`
-Frontmatter (name, description with trigger phrases like "set up my tracker",
-"add a property", "start tracking my rental/business") + the run procedure:
-- If `profile.json` exists in the property folder → summarize it and offer to
-  reconcile instead of re-interviewing.
-- Otherwise read `references/setup.md` and run the interview.
-- End every setup with the read-only dry run: generate the property folder, run
-  `engine/reconcile.py` on it, show the user their empty-but-working dashboard.
+### 1. Matching logic
+For each Expenses row with an empty File Reference cell:
+- Candidate pool: files in the property folder tree plus any `document_folders` from
+  `profile.json` (skip generated outputs: dashboards, reports, reconciliation.json).
+- Score on three signals: filename/date within ±5 days of the row date (many filenames
+  carry ISO dates — parse them; fall back to file modified time), amount appearing in
+  the filename (exact or with .00 stripped), and vendor tokens from the row description.
+- **Two-plausible-candidates rule:** if more than one candidate scores as a match,
+  propose NEITHER — list both under "ambiguous" instead. A wrong link is worse than
+  no link.
 
-### 2. `skill/olimazi-setup/references/setup.md`
-The interview. Sections:
-- **What are we tracking?** Rental property (Schedule E) or a small business
-  (Schedule C — note the engine's Sch C support is still being adapted; set
-  expectations honestly). Name/address of the property or business.
-- **Which schedule lines apply?** Walk the common lines (insurance, repairs,
-  professional fees, taxes, etc.); record which apply so the dashboard can
-  grey out the rest. Owned outright vs mortgage (Line 12 n/a pattern).
-- **Where do documents arrive?** Drop folder location(s); email note for later
-  (email intake is a future packet — record the address, don't wire it).
-- **Scaffold** via `engine/new_area_setup.py` + a fresh workbook from the fixture
-  generator's layout (reuse `fixtures/make_fixture.py` structure with the user's real
-  property name and EMPTY data rows — factor a shared helper if that avoids
-  duplicating layout code, but keep make_fixture.py's demo behavior unchanged).
-- **Write `profile.json`** (property name, type, applicable lines, folders,
-  anticipated-items placeholders) and confirm with the dry run.
+### 2. Propose-only output (hard rule)
+- The matcher NEVER writes to the tracker workbook, never moves/renames/deletes files.
+- Output: `MatchProposals.md` (human-readable: row, vendor, amount, proposed file,
+  the evidence for the match) + `match_state.json` (machine state) in the property
+  folder.
+- Miss tracking lives in `match_state.json` (not the tracker): rows searched and not
+  found accumulate a miss count across runs; at 2+ misses a row moves to a
+  **"Need from you"** section at the top of MatchProposals.md (vendor, date, amount).
+- Accepting a proposal is a human/assistant action outside this tool — the .md should
+  say exactly what to paste into the File Reference cell for each proposal.
 
-### 3. Fixture regression check (your proposal, accepted)
-`fixtures/check_fixture.py`: regenerates the workbook, runs the reconciler,
-asserts exit 1 / exactly one failure / the missing locksmith reference. Plain
-Python, no new dependencies. Add one line to README pointing at it.
+### 3. Prove it on the fixture
+Extend the fixture story: add to `fixtures/make_fixture.py` a second intentional
+scenario — one expense row with NO file reference whose true receipt DOES exist in
+`source-docs/` (matchable by date+amount+vendor), plus keep the missing-locksmith row
+(which the matcher should report as a miss, since its file genuinely doesn't exist).
+Then extend `fixtures/check_fixture.py` to also run the matcher and assert: exactly one
+proposal (the right file), the locksmith row in misses, zero writes to the workbook
+(compare file hash before/after the matcher runs).
 
 ### 4. Report
-Overwrite `sol/REPORT.md`: files, how you tested the interview flow end-to-end
-(walk a fake user through it in your report), regression-check output, proposals.
+Overwrite `sol/REPORT.md`: files, matcher output pasted from the fixture run, the
+hash-unchanged proof, edge cases you considered, proposals.
 
 ## Out of scope
-- Email intake wiring, scheduled tasks, packaging/releases
-- Engine guardrail changes; real data; dependencies beyond Python 3 + openpyxl
+- Writing anything into any .xlsx; email search (folders only for now); packaging
+- Engine guardrail changes; new dependencies beyond Python 3 + openpyxl
 - This file
