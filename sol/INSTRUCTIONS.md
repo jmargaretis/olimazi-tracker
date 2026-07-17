@@ -1,57 +1,49 @@
 # SOL work packet — active
 
-**Packet:** tracker-#3 · issued 2026-07-17 · authored by Claude (planning side)
+**Packet:** tracker-#4 · issued 2026-07-17 · authored by Claude (planning side)
 **Protocol:** see `AGENTS.md`. Direct-change authority within scope only.
 
-**Packet tracker-#2: ACCEPTED.** Independent verification on the planning side: regression
-check PASS; scaffold → empty tracker reconciled 8/8 at $0.00; overwrite refusal works;
-profile-driven dashboard renders the property name and greys non-selected lines; skill
-validated. The profile.json read-only design in reconcile.py is exactly right. Your two
-proposals are acknowledged: native Schedule C support is queued as its own future packet;
-the legacy-branch cleanup will ride along in a later hygiene packet.
+**Packet tracker-#3: ACCEPTED with one review fix.** The matcher itself verified
+perfectly on the planning side (proposal, ambiguity refusal, miss escalation, hash
+proof). The review fix: clearing the locksmith row's dangling reference silently
+removed the fixture's break demo — the reconciler exited 0 while docs/SETUP.md still
+promised users "exactly one FAIL." Restored via a new Sample Gardener row with an
+intentionally dangling reference (non-empty ref, so your matcher scenarios are
+untouched); check_fixture now asserts exit 1 + that specific dangling file; SETUP.md
+wording updated. Lesson for future packets: when a change alters generated-output
+behavior, grep docs/ for promises about that behavior.
 
-## Packet tracker-#3 scope — the receipt↔row matcher
+## Packet tracker-#4 scope — packaging
 
-Build `engine/match_receipts.py`: for tracker rows that have no File Reference, find the
-likely source document — and **propose, never book**. This is the engine's strictest
-guardrail surface; the design rules below are requirements, not suggestions.
+Make the repo releasable as a versioned zip a non-technical user downloads and runs.
 
-### 1. Matching logic
-For each Expenses row with an empty File Reference cell:
-- Candidate pool: files in the property folder tree plus any `document_folders` from
-  `profile.json` (skip generated outputs: dashboards, reports, reconciliation.json).
-- Score on three signals: filename/date within ±5 days of the row date (many filenames
-  carry ISO dates — parse them; fall back to file modified time), amount appearing in
-  the filename (exact or with .00 stripped), and vendor tokens from the row description.
-- **Two-plausible-candidates rule:** if more than one candidate scores as a match,
-  propose NEITHER — list both under "ambiguous" instead. A wrong link is worse than
-  no link.
+### 1. `VERSION` file
+Repo root, containing `0.1.0`.
 
-### 2. Propose-only output (hard rule)
-- The matcher NEVER writes to the tracker workbook, never moves/renames/deletes files.
-- Output: `MatchProposals.md` (human-readable: row, vendor, amount, proposed file,
-  the evidence for the match) + `match_state.json` (machine state) in the property
-  folder.
-- Miss tracking lives in `match_state.json` (not the tracker): rows searched and not
-  found accumulate a miss count across runs; at 2+ misses a row moves to a
-  **"Need from you"** section at the top of MatchProposals.md (vendor, date, amount).
-- Accepting a proposal is a human/assistant action outside this tool — the .md should
-  say exactly what to paste into the File Reference cell for each proposal.
+### 2. `tools/make_release.py`
+Python 3 stdlib only. Builds `dist/olimazi-tracker-v<VERSION>.zip` containing:
+- `engine/`, `skill/`, `docs/`, `fixtures/make_fixture.py`, `fixtures/check_fixture.py`
+- `README.md`, `LICENSE`, `DISCLAIMER.md`, `VERSION`
+- EXCLUDES: `sol/`, `.git*`, `dist/`, generated outputs under `fixtures/sample-property/`,
+  `__pycache__`, `AGENTS.md`, `tools/`
+The zip's top-level folder must be `olimazi-tracker/` (so Extract All gives a clean
+folder name — SETUP.md Part 2 step 5 should be updated to match the extracted name
+for the release-zip path while still working for the GitHub Code→Download ZIP path;
+one short note covering both names is fine).
 
-### 3. Prove it on the fixture
-Extend the fixture story: add to `fixtures/make_fixture.py` a second intentional
-scenario — one expense row with NO file reference whose true receipt DOES exist in
-`source-docs/` (matchable by date+amount+vendor), plus keep the missing-locksmith row
-(which the matcher should report as a miss, since its file genuinely doesn't exist).
-Then extend `fixtures/check_fixture.py` to also run the matcher and assert: exactly one
-proposal (the right file), the locksmith row in misses, zero writes to the workbook
-(compare file hash before/after the matcher runs).
+### 3. Prove the zip
+In your report: build the zip, extract it to a fresh temp folder, and run the SETUP.md
+smoke test from the extracted tree (fixture generate → reconcile exits 1 with the one
+intended gardener break → dashboard file exists). Paste the transcript.
 
-### 4. Report
-Overwrite `sol/REPORT.md`: files, matcher output pasted from the fixture run, the
-hash-unchanged proof, edge cases you considered, proposals.
+### 4. `.gitignore`
+Add `dist/`.
+
+### 5. Report
+Overwrite `sol/REPORT.md`: files, zip content listing, extraction smoke-test
+transcript, proposals.
 
 ## Out of scope
-- Writing anything into any .xlsx; email search (folders only for now); packaging
-- Engine guardrail changes; new dependencies beyond Python 3 + openpyxl
-- This file
+- Publishing the GitHub Release itself (planning side does that at review)
+- Site changes (separate packet on the site repo)
+- Engine/skill behavior changes; new dependencies; this file

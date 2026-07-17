@@ -265,6 +265,18 @@ def build_expenses(wb: Workbook) -> None:
             "ACCOUNTANT REVIEW: Confirm the negative repair contra treatment with the preparer.",
         ],
         [
+            date(2026, 4, 20),
+            "Sample Gardener",
+            "Spring yard cleanup",
+            "L14 — Repairs",
+            180,
+            180,
+            0,
+            "Paid",
+            "source-docs/missing-gardener-invoice.pdf",
+            "Intentionally dangling reference — demonstrates the reconciler catching a broken link.",
+        ],
+        [
             date(2026, 4, 5),
             "Sample Locksmith",
             "Replace rear-entry lock",

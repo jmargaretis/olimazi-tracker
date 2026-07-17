@@ -63,7 +63,7 @@ Keep the blue PowerShell window open and complete these steps in order.
    ```
 
    The summary should show exactly **one FAIL**. That is intentional: the example
-   points to a locksmith receipt that does not exist, demonstrating how a broken file
+   points to a gardener invoice that does not exist, demonstrating how a broken file
    reference is caught. Warnings are review reminders, not engine crashes.
 
 3. Open the sample dashboard:

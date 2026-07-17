@@ -48,9 +48,10 @@ def main() -> int:
             check for check in result["checks"] if check.get("status") == "FAIL"
         ]
 
-        assert reconciled.returncode == 0, reconciled.stdout + reconciled.stderr
-        assert result["fails"] == 0, result
-        assert not failures, failures
+        assert reconciled.returncode == 1, reconciled.stdout + reconciled.stderr
+        assert result["fails"] == 1, result
+        assert len(failures) == 1, failures
+        assert "missing-gardener-invoice.pdf" in failures[0].get("detail", ""), failures
 
         tracker = work / "fixtures" / "sample-property" / "sample-tracker.xlsx"
         before = hashlib.sha256(tracker.read_bytes()).hexdigest()
@@ -114,7 +115,7 @@ def main() -> int:
         assert hashlib.sha256(tracker.read_bytes()).hexdigest() == before
 
         print("Fixture regression: PASS")
-        print("  reconcile exit: 0; failures: 0")
+        print("  reconcile exit: 1; failures: 1 (intended: missing-gardener-invoice.pdf)")
         print("  matcher: 1 proposal, 0 ambiguous, 1 miss")
         print("  proposal: source-docs/2026-04-10_sample-electric_145.pdf")
         print("  miss after two runs: Sample Locksmith (Need from you)")

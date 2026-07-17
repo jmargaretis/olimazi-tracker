@@ -3,7 +3,7 @@
   "tracker": "sample-tracker.xlsx",
   "proposals": [
     {
-      "row": 13,
+      "row": 14,
       "vendor": "Sample Electric",
       "date": "2026-04-10",
       "amount": 145.0,
@@ -20,11 +20,11 @@
   "ambiguous": [],
   "misses": [
     {
-      "row": 12,
+      "row": 13,
       "vendor": "Sample Locksmith",
       "date": "2026-04-05",
       "amount": 95.0,
-      "miss_count": 2
+      "miss_count": 1
     }
   ]
 }
