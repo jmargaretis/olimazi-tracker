@@ -1,0 +1,4 @@
+interface:
+  display_name: "Olimazi Setup"
+  short_description: "Set up a rental or small-business tracker"
+  default_prompt: "Use $olimazi-setup to set up my tracker."

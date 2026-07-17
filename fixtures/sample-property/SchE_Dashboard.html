@@ -30,6 +30,7 @@ td{padding:8px 4px;border-bottom:1px solid var(--sand)} .num{text-align:right;fo
 tr:last-child td{border-bottom:none}
 .corrected td{font-weight:700;color:var(--crimson)} .tag{font-size:10px;background:#f1e3d2;color:var(--crimson);padding:1px 6px;border-radius:6px;font-weight:600}
 .booked td{font-weight:800}
+.inactive{opacity:.42}
 .chip{background:#fff;border:1px solid var(--sand);border-radius:12px;padding:10px 12px;margin-bottom:10px}
 .chip-t{font-weight:700;font-size:14px} .chip-d{font-size:12px;color:var(--muted);margin-top:2px}
 ul.checks{list-style:none;padding:0;margin:0;font-size:13px}
@@ -53,16 +54,16 @@ footer{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}
 </nav>
 <div class=hero>
   <h1>Schedule E</h1>
-  <p class=addr>12 Sample Street · Anytown, CA 00000</p>
-  <p>Reconciled from <code>sample-tracker.xlsx</code> &middot; cash-basis 2026 &middot; always matches the spreadsheet.</p>
+  <p class=addr>12 Sample Street</p>
+  <p>Reconciled from <code>sample-tracker.xlsx</code> &middot; deterministic arithmetic &middot; always matches the spreadsheet.</p>
 </div>
 <div class=grid>
   <div class=card><h2>Schedule E bottom line</h2>
-    <table><tr><td>3 — Rents received (YTD)</td><td class='num'>$7,150.00</td></tr>
-<tr><td>9 — Insurance</td><td class='num'>$1,200.00</td></tr>
-<tr><td>10 — Professional fees</td><td class='num'>$350.00</td></tr>
-<tr><td>14 — Repairs</td><td class='num'>$630.00</td></tr>
-<tr><td>20 — Total expenses</td><td class='num'>$3,530.00</td></tr>
+    <table><tr class=''><td>3 — Rents received (YTD)</td><td class='num'>$7,150.00</td></tr>
+<tr class=''><td>9 — Insurance</td><td class='num'>$1,200.00</td></tr>
+<tr class=''><td>10 — Professional fees</td><td class='num'>$350.00</td></tr>
+<tr class=''><td>14 — Repairs</td><td class='num'>$630.00</td></tr>
+<tr class=''><td>20 — Total expenses</td><td class='num'>$3,530.00</td></tr>
       <tr class=booked><td>21 — Net income (as booked)</td><td class=num>$3,620.00</td></tr>
       
     </table></div>

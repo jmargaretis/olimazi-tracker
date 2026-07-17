@@ -1,5 +1,5 @@
 # Schedule E — Reconciliation Report
-**Property:** 12 Sample Street · **Generated:** 2026-07-17 · _Deterministic check — recomputed from raw rows, no model judgment._
+**Tracker:** 12 Sample Street · **Generated:** 2026-07-17 · _Deterministic check — recomputed from raw rows, no model judgment._
 
 ## Verdict: **1 BREAK(S) FOUND**  (1 warning(s))
 

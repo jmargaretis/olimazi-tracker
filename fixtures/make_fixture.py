@@ -509,6 +509,81 @@ def build_workbook() -> None:
     wb.save(WORKBOOK)
 
 
+def build_empty_workbook(
+    property_name: str,
+    output_path: Path,
+    applicable_lines: list[int],
+    tracker_type: str = "rental",
+) -> None:
+    """Create an empty tracker using the demonstration workbook's four-tab layout."""
+    wb = Workbook()
+    build_income(wb)
+    build_expenses(wb)
+    build_summary(wb)
+    build_review(wb)
+
+    schedule = "Schedule E" if tracker_type == "rental" else "Schedule C setup preview"
+
+    income = wb["Income"]
+    income["A1"] = f"{property_name} — Income"
+    income["A2"] = "Empty tracker. Add income only after confirming it from source records."
+    income["B4"] = property_name
+    for row in range(6, 18):
+        for column in range(2, 6):
+            income.cell(row, column).value = None
+    income["A19"] = "YTD net income from Actual months"
+    income["D19"] = 0
+
+    expenses = wb["Expenses"]
+    expenses["A1"] = f"{property_name} — Expenses"
+    expenses["A2"] = "Empty tracker. File references are relative to this tracker folder."
+    expenses["B3"] = property_name
+    expenses.delete_rows(5, max(expenses.max_row - 4, 0))
+    style_body(expenses, 5, 24, 1, 10)
+    expense_status = DataValidation(
+        type="list", formula1='"Paid,Pending,Received,TBD"', allow_blank=True
+    )
+    expenses.add_data_validation(expense_status)
+    expense_status.add("H5:H104")
+
+    summary = wb["Sch. E Summary"]
+    summary["A1"] = f"{property_name} — {schedule} Summary"
+    summary["A2"] = (
+        "Formulas only on this tab. The reconciler recomputes totals from Income and Expenses."
+    )
+    summary["B4"] = property_name
+    summary["B5"] = None
+    summary["D8"] = "Actual months only."
+    summary["D9"] = "Leave at zero unless applicable."
+    summary.column_dimensions["A"].width = 16
+    applicable = set(applicable_lines)
+    for row in range(10, 25):
+        line = row - 5
+        if line not in applicable:
+            for cell in summary[row][1:4]:
+                cell.fill = PatternFill("solid", fgColor="E6E2D8")
+                cell.font = Font(name="Calibri", size=10, color=MUTED)
+            summary.cell(row, 4).value = "Not selected during setup."
+
+    review = wb["Review"]
+    review["A1"] = f"{property_name} — Review Queue"
+    review["A2"] = "Empty queue. Add questions or missing-data items for review."
+    review["B3"] = "Setup complete"
+    review.delete_rows(5, max(review.max_row - 4, 0))
+    style_body(review, 5, 24, 1, 5)
+    review_status = DataValidation(
+        type="list", formula1='"Open,Resolved"', allow_blank=True
+    )
+    review.add_data_validation(review_status)
+    review_status.add("E5:E104")
+
+    wb.calculation.fullCalcOnLoad = True
+    wb.calculation.forceFullCalc = True
+    wb.calculation.calcMode = "auto"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(output_path)
+
+
 if __name__ == "__main__":
     build_workbook()
     print(f"Created fake sample fixture: {WORKBOOK}")

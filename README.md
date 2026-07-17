@@ -36,3 +36,6 @@ Review item, and it re-reconciles after every write.
 - `fixtures/` — sample property with fake data for testing and demos (in progress).
 - `docs/` — workbook layout spec and (coming) the plain-English setup guide.
 - `sol/` — work-packet protocol for the build agents (see AGENTS.md).
+
+Run `python fixtures/check_fixture.py` to regenerate the fake fixture in isolation
+and confirm its one intentional missing-reference failure.

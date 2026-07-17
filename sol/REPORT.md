@@ -1,66 +1,85 @@
 # SOL completion report
 
-## Files added
+## Files changed
 
-- `.gitattributes` — preserves generated PDF and XLSX files as binary in Git.
-- `.gitignore` — excludes local Python bytecode caches.
-- `fixtures/make_fixture.py` — deterministic Python 3 + `openpyxl` fixture generator.
-- `fixtures/sample-property/sample-tracker.xlsx` — fake 12 Sample Street tracker with
-  Income, Expenses, Sch. E Summary, and Review tabs.
-- `fixtures/sample-property/source-docs/` — sanitized placeholder policy, receipt,
-  invoice, assessment, consultation, and reimbursement records.
-- `fixtures/sample-property/SchE_Dashboard.html` — generated dashboard.
-- `fixtures/sample-property/SchE_Reconciliation.md` — generated readable reconciliation.
-- `fixtures/sample-property/reconciliation.json` — generated machine-readable results.
-- `docs/SETUP.md` — nontechnical Windows setup and five-minute smoke test.
+- `skill/olimazi-setup/SKILL.md` — first-run and resume procedure, including the
+  mandatory read-only reconciliation dry run.
+- `skill/olimazi-setup/references/setup.md` — confirmation-first interview for tracker
+  type, schedule lines, mortgage status, document folders, and recorded-only email.
+- `skill/olimazi-setup/agents/openai.yaml` — generated skill-list metadata.
+- `engine/new_area_setup.py` — self-contained rental/business scaffold that refuses
+  overwrite, creates an empty workbook, preserves the copy-only intake scanner, and
+  writes `profile.json`.
+- `fixtures/make_fixture.py` — reusable `build_empty_workbook()` path; the existing
+  `build_workbook()` demonstration behavior is unchanged.
+- `engine/reconcile.py` — read-only `profile.json` support for tracker name/type and
+  applicable-line display. Arithmetic and source-data guardrails are unchanged.
+- `fixtures/check_fixture.py` — isolated fixture regression check.
+- `fixtures/sample-property/` generated workbook, JSON, report, and dashboard —
+  regenerated from fake data to match the current generator and reconciler.
+- `README.md` — one-line regression-check command.
 
-The fixture deliberately does not include
-`source-docs/missing-locksmith-receipt.pdf`; that is the packet's one intended
-dangling reference.
+## Fake interview walkthrough
 
-## Reconciler output
+I walked a fake user through a rental setup using only `12 Sample Street`:
+
+1. Tracking type: rental / Schedule E.
+2. Display name: `12 Sample Street`.
+3. Applicable lines: 3, 9, 10, 14, and 16.
+4. Mortgage: no; Line 12 remained unselected.
+5. Document arrival: a temporary fake local folder.
+6. Email: `records@example.invalid`, recorded with status `recorded_only`; no mailbox
+   was connected.
+7. Scaffold command exited `0` and created `profile.json`, `tracker.xlsx`, the
+   copy-only intake scanner, and the standard folders outside the repository.
+8. `engine/reconcile.py` exited `0`: 8 checks, 0 failures, 0 warnings, $0.00 net
+   income, and an empty working dashboard.
+9. A second invocation against the same destination exited `1` and refused to
+   overwrite it.
+10. The generated intake scanner compiled and its `--dry-run` exited `0` without
+    capturing or modifying any source files.
+
+I also ran a fake business setup. It exited `0`, recorded
+`schedule_c_setup_preview`, displayed the Schedule C preview warning, and produced the
+structural empty dashboard without claiming completed Schedule C line support.
+
+## Workbook and skill verification
+
+- Skill validator: `Skill is valid!`
+- Python compile check: passed for the scaffolder, reconciler, generator, and fixture
+  regression script.
+- Workbook inspection: four expected tabs; formulas only on `Sch. E Summary`; no
+  formula-error strings found.
+- Visual render: all four tabs inspected; empty entry rows, headers, validations, and
+  muted non-applicable lines were legible.
+- Dashboard applicability check: an omitted Line 10 rendered with the `not selected`
+  label and inactive styling.
+- Data-hygiene scan: no new personal or financial data; all committed examples remain
+  fake `12 Sample Street` data.
+
+## Fixture regression output
 
 ```text
-RECONCILIATION  2026-07-17
-  Net income as booked : $3,620.00
-  Net income corrected : $3,620.00
-  Checks: 8  FAIL=1  WARN=1
-  [ok] Income: YTD (Jan-Apr) == sum of 'Actual' months
-  [ok] Expenses: category lines sum to Paid-YTD total
-  [ok] Excel SUMIF strings match canonical labels (em-dash exact)
-  [FAIL] File references resolve to real files on disk
-  [ok] Insurance reimbursement is booked
-  [ok] No unexplained open balances on Expenses
-  [ok] No unallocated/TBD expense rows
-  [warn] Accountant-review queue is clear
-  Report: fixtures\sample-property\SchE_Reconciliation.md
+Fixture regression: PASS
+  reconcile exit: 1
+  failures: 1
+  intended missing reference: missing-locksmith-receipt.pdf
 ```
 
-The command exits `1`, as required. The only failure is Expenses row 12,
-`source-docs/missing-locksmith-receipt.pdf`. The warning is the intended
-accountant-review flag for the negative insurance reimbursement contra entry.
+The regression runs in a temporary isolated tree, so it does not dirty the committed
+sample workbook.
 
-## Engine patches
+## Skipped
 
-None. The fixture reached the target using the existing reconciler.
-
-## `[VERIFY]` list from the setup guide
-
-- Confirm the current python.org Windows page still presents the main
-  **Download Python 3** button.
-- Confirm the current Python installer still offers an **Add python.exe to PATH**
-  checkbox at the bottom of its first window.
-- Confirm typing `powershell` in File Explorer's address bar still opens
-  PowerShell in that folder on supported Windows versions.
-- If `py` is not recognized, confirm rerunning the installer with the PATH option
-  is still the correct first remedy.
+- Email intake wiring, scheduled tasks, packaging, and releases were out of scope.
+- No live user data was used and no tracker generated during the walkthrough is being
+  committed.
 
 ## Proposals
 
-- Add a small automated fixture regression check in a future packet that regenerates
-  the workbook and asserts exit `1`, exactly one failure, and the expected missing
-  locksmith reference.
-- Replace the pre-existing phrase “John's explicit confirmation” in
-  `engine/dashboard_server.py` with role-based wording such as “the owner's explicit
-  confirmation.” It looks personal, so it is flagged here as required; changing the
-  engine was outside this packet.
+- Complete a native Schedule C workbook/line map and use Schedule C-specific output
+  filenames in a future packet. The current business path is intentionally labeled as
+  a setup preview.
+- In a future cleanup packet, remove the now-unused legacy external-project scaffold
+  branch from `engine/new_area_setup.py` after confirming no older installation still
+  invokes it.

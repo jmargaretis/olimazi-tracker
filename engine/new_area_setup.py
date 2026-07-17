@@ -20,9 +20,12 @@ script does not invent keywords for you.
 """
 from __future__ import annotations
 import argparse
+import json
 import os
+import re
 import shutil
 import sys
+from pathlib import Path
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../Schedule E and C
 
@@ -312,13 +315,14 @@ def build_intake_scan(area_name: str, noun: str, mode_key: str, drop_folder_name
     safe_words = [w for w in words if len(w) >= 4 and w not in NAME_STOPWORDS]
     keywords = [full_name] + safe_words if len(words) > 1 else words
     keyword_lines = ",\n".join(f'    "{k}"' for k in dict.fromkeys(keywords))  # dedupe, keep order
+    escaped_drop_folder = drop_folder_name.replace("\\", "\\\\").replace('"', '\\"')
     return INTAKE_TEMPLATE.format(
         area_name=area_name, noun=noun, mode_key=mode_key,
-        drop_folder_name=drop_folder_name, keyword_lines=keyword_lines,
+        drop_folder_name=escaped_drop_folder, keyword_lines=keyword_lines,
     )
 
 
-def main():
+def legacy_main():
     ap = argparse.ArgumentParser(description="Scaffold a new Sch. E (rental) or Sch. C (business) area.")
     ap.add_argument("--type", required=True, choices=["rental", "business"])
     ap.add_argument("--name", required=True, help='Display name, e.g. "45 Example Ave" or "Acme Plumbing"')
@@ -388,6 +392,135 @@ def main():
     print(f"  2. Review/extend STRICT_KEYWORDS in {os.path.join(area_path, '_System', 'intake_scan.py')}")
     print(f"  3. Decide if this area needs its own scheduled review task")
     print("  4. Re-check ONBOARDING.md section 2 — confirm which email channel can actually send for this area")
+    return 0
+
+
+def safe_folder_name(name: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return slug or "olimazi-tracker"
+
+
+def parse_lines(raw: str) -> list[int]:
+    if not raw.strip():
+        return list(range(3, 20))
+    lines = sorted({int(value.strip()) for value in raw.split(",") if value.strip()})
+    invalid = [line for line in lines if line < 3 or line > 19]
+    if invalid:
+        raise ValueError("Schedule lines must be comma-separated numbers from 3 through 19.")
+    return lines
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Create an empty Olimazi rental or small-business tracker."
+    )
+    ap.add_argument("--type", required=True, choices=["rental", "business"])
+    ap.add_argument("--name", required=True, help="Property or business display name")
+    ap.add_argument(
+        "--output",
+        help='Tracker folder (default: "~/Olimazi Trackers/<name>")',
+    )
+    ap.add_argument(
+        "--applicable-lines",
+        default="",
+        help="Comma-separated schedule line numbers from 3 through 19",
+    )
+    ap.add_argument(
+        "--mortgage",
+        choices=["yes", "no", "not-applicable"],
+        default="not-applicable",
+    )
+    ap.add_argument(
+        "--document-folder",
+        action="append",
+        default=[],
+        help="Folder where documents arrive; repeat for multiple folders",
+    )
+    ap.add_argument(
+        "--email",
+        default="",
+        help="Email address to record for future intake; no email connection is created",
+    )
+    ap.add_argument(
+        "--keywords",
+        default="",
+        help="Comma-separated filename keywords for the generated intake scanner",
+    )
+    ap.add_argument(
+        "--drop-folder",
+        default=None,
+        help="Primary document drop folder; defaults to the first --document-folder",
+    )
+    args = ap.parse_args()
+
+    try:
+        applicable_lines = parse_lines(args.applicable_lines)
+    except ValueError as exc:
+        ap.error(str(exc))
+
+    default_output = Path.home() / "Olimazi Trackers" / safe_folder_name(args.name)
+    area_path = Path(args.output).expanduser().resolve() if args.output else default_output
+    if area_path.exists():
+        print(f"ERROR: {area_path} already exists — refusing to overwrite.")
+        return 1
+
+    document_folders = [
+        str(Path(folder).expanduser().resolve()) for folder in args.document_folder
+    ]
+    drop_folder_name = args.drop_folder or (
+        document_folders[0] if document_folders else str(area_path / "document-drop")
+    )
+
+    for sub in ("_Inbox", "_Archive", "_OutOfScope", "_System", "Reference", "Reports"):
+        (area_path / sub).mkdir(parents=True, exist_ok=True)
+
+    noun = "rental property" if args.type == "rental" else "business"
+    mode_key = "property" if args.type == "rental" else "business"
+    intake_src = build_intake_scan(args.name, noun, mode_key, drop_folder_name)
+    if args.keywords.strip():
+        extra = [k.strip().lower() for k in args.keywords.split(",") if k.strip()]
+        extra_lines = ",\n".join(f'    "{k}"' for k in extra)
+        intake_src = intake_src.replace(
+            "STRICT_KEYWORDS = [\n", f"STRICT_KEYWORDS = [\n{extra_lines},\n", 1
+        )
+    (area_path / "_System" / "intake_scan.py").write_text(
+        intake_src, encoding="utf-8"
+    )
+
+    sys.path.insert(0, PROJECT_ROOT)
+    from fixtures.make_fixture import build_empty_workbook
+
+    tracker_path = area_path / "tracker.xlsx"
+    build_empty_workbook(args.name, tracker_path, applicable_lines, args.type)
+
+    profile = {
+        "profile_version": 1,
+        "name": args.name,
+        "type": args.type,
+        "applicable_lines": applicable_lines,
+        "mortgage": (
+            True if args.mortgage == "yes" else False if args.mortgage == "no" else None
+        ),
+        "document_folders": document_folders,
+        "email_intake": {
+            "address": args.email,
+            "status": "recorded_only",
+        },
+        "anticipated_items": [],
+        "engine_support": (
+            "schedule_e" if args.type == "rental" else "schedule_c_setup_preview"
+        ),
+    }
+    with open(area_path / "profile.json", "w", encoding="utf-8") as f:
+        json.dump(profile, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    print(f"Created empty {args.type} tracker: {area_path}")
+    print(f"  Workbook: {tracker_path}")
+    print(f"  Profile:  {area_path / 'profile.json'}")
+    if args.type == "business":
+        print("  NOTE: Schedule C reconciliation is still being adapted; this is a setup preview.")
+    print("  Email intake was recorded only; no email connection was created.")
     return 0
 
 

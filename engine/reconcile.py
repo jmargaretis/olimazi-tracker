@@ -21,6 +21,7 @@ import os
 import re
 import sys
 from datetime import date
+from html import escape
 
 import openpyxl
 
@@ -149,6 +150,31 @@ def load():
     return wb
 
 
+def read_profile(wb):
+    """Read optional setup metadata without modifying the tracker or its sources."""
+    fallback_name = str(wb["Income"]["B4"].value or "Unnamed tracker").strip()
+    profile = {
+        "name": fallback_name,
+        "type": "rental",
+        "applicable_lines": list(range(3, 20)),
+        "engine_support": "schedule_e",
+    }
+    path = os.path.join(ROOT, "profile.json")
+    if os.path.exists(path):
+        try:
+            loaded = json.load(open(path, encoding="utf-8"))
+            if isinstance(loaded, dict):
+                profile.update(loaded)
+        except (OSError, ValueError):
+            pass
+    profile["name"] = str(profile.get("name") or fallback_name).replace("\n", " ").strip()
+    profile["type"] = "business" if profile.get("type") == "business" else "rental"
+    profile["applicable_lines"] = [
+        line for line in profile.get("applicable_lines", []) if isinstance(line, int)
+    ]
+    return profile
+
+
 def read_income(ws):
     """Return (ytd_net, full_year_net, actual_net, rows)."""
     rows = []
@@ -232,6 +258,7 @@ def main():
         print(f"Tracker not found: {TRACKER}")
         return 99
     wb = load()
+    profile = read_profile(wb)
     inc = wb["Income"]
     exp = wb["Expenses"]
 
@@ -353,6 +380,11 @@ def main():
     open_items = read_review_open(wb)
     summary = {
         "generated": str(date.today()),
+        "profile": profile,
+        "property_name": profile["name"],
+        "tracking_type": profile["type"],
+        "applicable_lines": profile["applicable_lines"],
+        "tracker_name": os.path.basename(TRACKER),
         "open_items": open_items,
         "anticipated": anticipated,
         "accountant_review": acct_flags,
@@ -497,6 +529,12 @@ def write_dashboard(s, rep):
     verdict = "RECONCILED" if not fails else f"{len(fails)} BREAK(S)"
     vcolor = "#566123" if not fails else "#9B1C2E"
     open_unres = [i for i in s.get("open_items", []) if not i["resolved"]]
+    schedule_label = (
+        "Schedule E" if s["tracking_type"] == "rental" else "Schedule C (setup preview)"
+    )
+    property_name = escape(s["property_name"])
+    tracker_name = escape(s["tracker_name"])
+    applicable = set(s.get("applicable_lines", []))
 
     def chips():
         out = []
@@ -511,8 +549,18 @@ def write_dashboard(s, rep):
             out.append(("#566123", "No open items", "Everything reconciles", None))
         return out
 
+    def dashboard_row(label, value):
+        line = int(label.split()[0])
+        inactive = line not in applicable and line != 20
+        tag = " <span class=tag>not selected</span>" if inactive else ""
+        css_class = "inactive" if inactive else ""
+        return (
+            f"<tr class='{css_class}'><td>{label}{tag}</td>"
+            f"<td class='num'>{money(value)}</td></tr>"
+        )
+
     rows = "\n".join(
-        f"<tr><td>{lbl}</td><td class='num'>{money(val)}</td></tr>"
+        dashboard_row(lbl, val)
         for lbl, val in [
             ("3 — Rents received (YTD)", s["line3_rents_ytd"]),
             ("9 — Insurance", s["line9_insurance"]),
@@ -589,7 +637,7 @@ def write_dashboard(s, rep):
 
     html = f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>Schedule E — 12 Sample Street</title>
+<title>{schedule_label} — {property_name}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23566123'/><path d='M12 34 L32 18 L52 34' fill='none' stroke='%23F4EDDD' stroke-width='5'/><path d='M16 46 H48' stroke='%23F4EDDD' stroke-width='4'/><path d='M16 54 H40' stroke='%239B1C2E' stroke-width='4'/></svg>">
 <style>
 :root{{
@@ -619,6 +667,7 @@ td{{padding:8px 4px;border-bottom:1px solid var(--sand)}} .num{{text-align:right
 tr:last-child td{{border-bottom:none}}
 .corrected td{{font-weight:700;color:var(--crimson)}} .tag{{font-size:10px;background:#f1e3d2;color:var(--crimson);padding:1px 6px;border-radius:6px;font-weight:600}}
 .booked td{{font-weight:800}}
+.inactive{{opacity:.42}}
 .chip{{background:#fff;border:1px solid var(--sand);border-radius:12px;padding:10px 12px;margin-bottom:10px}}
 .chip-t{{font-weight:700;font-size:14px}} .chip-d{{font-size:12px;color:var(--muted);margin-top:2px}}
 ul.checks{{list-style:none;padding:0;margin:0;font-size:13px}}
@@ -641,12 +690,12 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
   <div class=right><span class=stamp>Updated {s['generated']}</span><span class=verdict>{verdict}</span></div>
 </nav>
 <div class=hero>
-  <h1>Schedule E</h1>
-  <p class=addr>12 Sample Street · Anytown, CA 00000</p>
-  <p>Reconciled from <code>sample-tracker.xlsx</code> &middot; cash-basis 2026 &middot; always matches the spreadsheet.</p>
+  <h1>{schedule_label}</h1>
+  <p class=addr>{property_name}</p>
+  <p>Reconciled from <code>{tracker_name}</code> &middot; deterministic arithmetic &middot; always matches the spreadsheet.</p>
 </div>
 <div class=grid>
-  <div class=card><h2>Schedule E bottom line</h2>
+  <div class=card><h2>{schedule_label} bottom line</h2>
     <table>{rows}
       <tr class=booked><td>21 — Net income (as booked)</td><td class=num>{money(s['net_income_as_booked'])}</td></tr>
       {corrected_row}
@@ -668,8 +717,11 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
 
 def write_report(s, rep):
     L = []
-    L.append(f"# Schedule E — Reconciliation Report")
-    L.append(f"**Property:** 12 Sample Street · **Generated:** {s['generated']} · "
+    schedule_label = (
+        "Schedule E" if s["tracking_type"] == "rental" else "Schedule C (setup preview)"
+    )
+    L.append(f"# {schedule_label} — Reconciliation Report")
+    L.append(f"**Tracker:** {s['property_name']} · **Generated:** {s['generated']} · "
              f"_Deterministic check — recomputed from raw rows, no model judgment._\n")
     verdict = "RECONCILED" if s["fails"] == 0 else f"{s['fails']} BREAK(S) FOUND"
     L.append(f"## Verdict: **{verdict}**  ({s['warns']} warning(s))\n")
