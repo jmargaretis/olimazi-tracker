@@ -2,7 +2,7 @@
 
 Same protocol as `olimazi-online`:
 
-When the owner says "check GitHub for instructions" (for the tracker), read the active
+When the owner says "check the tracker for instructions" (or names the olimazi-tracker repo), read the active
 packet in `sol/INSTRUCTIONS.md`. Execute only that packet's stated scope, commit to
 `main`, then overwrite `sol/REPORT.md` with the completion report in the required
 format below.
