@@ -76,6 +76,18 @@ Keep the blue PowerShell window open and complete these steps in order.
 4. Your normal web browser should open a page titled **Schedule E** for
    **12 Sample Street**. The red **1 BREAK(S)** badge proves the sample check ran.
 
+## Try the live dashboard (optional)
+
+To try resolving a sample review item from the dashboard, run:
+
+```powershell
+python engine/dashboard_server.py --tracker fixtures/sample-property/sample-tracker.xlsx --port 8745
+```
+
+Keep that window open, then visit `http://127.0.0.1:8745/` in your browser. Choose
+**Resolve** on an open item to save the sample update and refresh the dashboard.
+Press **Ctrl+C** in PowerShell when you are finished.
+
 ## What the test created
 
 Everything stays inside `fixtures\sample-property`:

@@ -30,6 +30,7 @@ import openpyxl
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)                      # Sch. E folder
 RECONCILE = os.path.join(HERE, "reconcile.py")
+RECONCILE_ROOT = ROOT
 DASHBOARD = os.path.join(ROOT, "SchE_Dashboard.html")
 
 sys.path.insert(0, HERE)
@@ -41,7 +42,8 @@ PORT = 8742
 
 def rerun_reconcile():
     """Regenerate dashboard/report from the books. Exit code = breaks (informational)."""
-    subprocess.run([sys.executable, RECONCILE, ROOT, "--quiet"], cwd=os.path.dirname(ROOT))
+    subprocess.run([sys.executable, RECONCILE, RECONCILE_ROOT, "--quiet"],
+                   cwd=os.path.dirname(RECONCILE_ROOT))
 
 
 def resolve_row(row, note):
@@ -101,13 +103,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    global TRACKER, PORT
+    global TRACKER, PORT, RECONCILE_ROOT, DASHBOARD
     ap = argparse.ArgumentParser()
     ap.add_argument("--tracker", help="override tracker path (testing)")
     ap.add_argument("--port", type=int, default=PORT)
     a = ap.parse_args()
     if a.tracker:
         TRACKER = os.path.abspath(a.tracker)
+        RECONCILE_ROOT = os.path.dirname(TRACKER)
+        DASHBOARD = os.path.join(RECONCILE_ROOT, "SchE_Dashboard.html")
     PORT = a.port
     print(f"[dashboard] tracker: {TRACKER}")
     rerun_reconcile()  # fresh dashboard on startup
