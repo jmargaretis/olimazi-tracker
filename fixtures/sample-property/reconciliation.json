@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-17",
+  "generated": "2026-07-19",
   "profile": {
     "name": "12 Sample Street",
     "type": "rental",
@@ -92,7 +92,7 @@
   "accountant_review": [
     {
       "where": "Expenses row 11",
-      "item": "Sample Mutual \u2014 $-300.00",
+      "item": "Sample Mutual \u2014 $-300",
       "note": "Confirm the negative repair contra treatment with the preparer."
     }
   ],
@@ -114,12 +114,12 @@
     {
       "name": "Income: YTD (Jan-Apr) == sum of 'Actual' months",
       "status": "PASS",
-      "detail": "YTD net $7,150.00 vs Actual-flagged months $7,150.00. Summary Line 3 links to Income!D19 (Jan-Apr)."
+      "detail": "YTD net $7,150 vs Actual-flagged months $7,150. Summary Line 3 links to Income!D19 (Jan-Apr)."
     },
     {
       "name": "Expenses: category lines sum to Paid-YTD total",
       "status": "PASS",
-      "detail": "Sum of L-line categories $3,855.00 vs sum of all Paid-YTD $3,855.00."
+      "detail": "Sum of L-line categories $3,855 vs sum of all Paid-YTD $3,855."
     },
     {
       "name": "Excel SUMIF strings match canonical labels (em-dash exact)",
@@ -149,7 +149,7 @@
     {
       "name": "Accountant-review queue is clear",
       "status": "WARN",
-      "detail": "1 item(s) flagged for a preparer to confirm: Sample Mutual \u2014 $-300.00"
+      "detail": "1 item(s) flagged for a preparer to confirm: Sample Mutual \u2014 $-300"
     }
   ]
 }

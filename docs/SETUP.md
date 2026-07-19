@@ -74,7 +74,7 @@ Keep the blue PowerShell window open and complete these steps in order.
    ```
 
 4. Your normal web browser should open a page titled **Schedule E** for
-   **12 Sample Street**. The red **1 BREAK(S)** badge proves the sample check ran.
+   **12 Sample Street**. The red **1 ALERT(S)** badge proves the sample check ran.
 
 ## Try the live dashboard (optional)
 

@@ -126,7 +126,7 @@ ANT_JS = r"""
 
 
 def money(x):
-    return f"${x:,.2f}"
+    return f"${x:,.0f}"
 
 
 def num(v):
@@ -526,7 +526,7 @@ def write_dashboard(s, rep):
     can never drift from the spreadsheet."""
     fails = [c for c in rep.checks if c["status"] == "FAIL"]
     warns = [c for c in rep.checks if c["status"] == "WARN"]
-    verdict = "RECONCILED" if not fails else f"{len(fails)} BREAK(S)"
+    verdict = "RECONCILED" if not fails else f"{len(fails)} ALERT(S)"
     vcolor = "#566123" if not fails else "#9B1C2E"
     open_unres = [i for i in s.get("open_items", []) if not i["resolved"]]
     schedule_label = (
@@ -699,6 +699,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
     <table>{rows}
       <tr class=booked><td>21 — Net income (as booked)</td><td class=num>{money(s['net_income_as_booked'])}</td></tr>
       {corrected_row}
+      <tr class=booked><td>Grand total (L3 − L20)</td><td class=num>{money(s['line3_rents_ytd'] - s['total_expenses'])}</td></tr>
     </table></div>
   <div class=card><h2>Open items ({len(open_unres)})</h2>{chip_html}</div>
 </div>
@@ -707,7 +708,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
   {acct_html}</div>
 <div class=card style="margin-top:18px"><h2>Reconciliation checks</h2>
   <ul class=checks>{check_html}</ul></div>
-<footer>Re-run: <code>python _System/reconcile.py</code> · {len(fails)} break(s), {len(warns)} warning(s)</footer>
+<footer>Re-run: <code>python _System/reconcile.py</code> · {len(fails)} alert(s), {len(warns)} warning(s)</footer>
 {anticipated_script}
 <script>{RESOLVE_JS}</script>
 </body></html>"""
@@ -723,7 +724,7 @@ def write_report(s, rep):
     L.append(f"# {schedule_label} — Reconciliation Report")
     L.append(f"**Tracker:** {s['property_name']} · **Generated:** {s['generated']} · "
              f"_Deterministic check — recomputed from raw rows, no model judgment._\n")
-    verdict = "RECONCILED" if s["fails"] == 0 else f"{s['fails']} BREAK(S) FOUND"
+    verdict = "RECONCILED" if s["fails"] == 0 else f"{s['fails']} ALERT(S) FOUND"
     L.append(f"## Verdict: **{verdict}**  ({s['warns']} warning(s))\n")
     L.append("## Bottom line")
     L.append(f"| Line | Amount |")
@@ -736,6 +737,7 @@ def write_report(s, rep):
     L.append(f"| **21 — Net income (as booked)** | **{money(s['net_income_as_booked'])}** |")
     if s["net_income_corrected"] != s["net_income_as_booked"]:
         L.append(f"| **21 — Net income (corrected for reimbursement)** | **{money(s['net_income_corrected'])}** |")
+    L.append(f"| **Grand total (L3 − L20)** | **{money(s['line3_rents_ytd'] - s['total_expenses'])}** |")
     L.append("")
     L.append("## Checks")
     for c in rep.checks:
@@ -750,7 +752,7 @@ def write_report(s, rep):
         for a in acct:
             L.append(f"- **{a['item']}** ({a['where']}) — {a['note']}")
     L.append("")
-    L.append("_Re-run any time with `python _System/reconcile.py`. Exit code = number of breaks._")
+    L.append("_Re-run any time with `python _System/reconcile.py`. Exit code = number of alerts._")
     with open(REPORT, "w", encoding="utf-8") as f:
         f.write("\n".join(L))
 

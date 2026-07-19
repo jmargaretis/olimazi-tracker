@@ -41,7 +41,7 @@ PORT = 8742
 
 
 def rerun_reconcile():
-    """Regenerate dashboard/report from the books. Exit code = breaks (informational)."""
+    """Regenerate dashboard/report from the books. Exit code = alerts (informational)."""
     subprocess.run([sys.executable, RECONCILE, RECONCILE_ROOT, "--quiet"],
                    cwd=os.path.dirname(RECONCILE_ROOT))
 
