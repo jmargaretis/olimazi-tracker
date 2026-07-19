@@ -4,6 +4,10 @@ A finance tracker you own. Local files, deterministic math, zero running cost â€
 rental (Schedule E) and small-business (Schedule C) bookkeeping, with an AI assistant
 handling the judgment calls and a Python engine keeping the numbers honest.
 
+User-facing rental pages are titled **Rental Manager** with **Sch. E** subtext. The
+future Schedule C counterpart will be titled **Business Manager** with **Sch. C**
+subtext.
+
 **Status: working prototype, being packaged.** Follow along at [olimazi.online](https://olimazi.online).
 
 ## The idea in one line

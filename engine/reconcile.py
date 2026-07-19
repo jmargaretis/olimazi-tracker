@@ -529,9 +529,8 @@ def write_dashboard(s, rep):
     verdict = "RECONCILED" if not fails else f"{len(fails)} ALERT(S)"
     vcolor = "#566123" if not fails else "#9B1C2E"
     open_unres = [i for i in s.get("open_items", []) if not i["resolved"]]
-    schedule_label = (
-        "Schedule E" if s["tracking_type"] == "rental" else "Schedule C (setup preview)"
-    )
+    schedule_label = "Sch. E" if s["tracking_type"] == "rental" else "Sch. C"
+    product_title = "Rental Manager" if s["tracking_type"] == "rental" else "Business Manager"
     property_name = escape(s["property_name"])
     tracker_name = escape(s["tracker_name"])
     applicable = set(s.get("applicable_lines", []))
@@ -637,7 +636,7 @@ def write_dashboard(s, rep):
 
     html = f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>{schedule_label} — {property_name}</title>
+<title>{product_title} — {schedule_label} — {property_name}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23566123'/><path d='M12 34 L32 18 L52 34' fill='none' stroke='%23F4EDDD' stroke-width='5'/><path d='M16 46 H48' stroke='%23F4EDDD' stroke-width='4'/><path d='M16 54 H40' stroke='%239B1C2E' stroke-width='4'/></svg>">
 <style>
 :root{{
@@ -653,9 +652,11 @@ nav{{display:flex;align-items:center;justify-content:space-between;gap:12px;padd
 .wm{{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}}
 .wm .wd{{color:var(--muted);font-weight:500}}
 .right{{display:flex;align-items:center;gap:12px}} .stamp{{color:var(--muted);font-size:12px}}
+.navlink{{color:var(--olive);font-size:13px;font-weight:700;text-decoration:none}}
 .verdict{{display:inline-block;padding:6px 14px;border-radius:999px;color:#fff;font-weight:700;font-size:13px;background:{vcolor}}}
 .hero{{padding:28px 6px 6px}}
 .hero h1{{font-size:34px;line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}}
+.hero h1 small{{font-size:15px;color:var(--muted);font-weight:600;letter-spacing:0;margin-left:8px}}
 .hero .addr{{margin:6px 0 4px;font-size:15px;font-weight:600;color:var(--ink)}}
 .hero p{{margin:0;color:var(--muted);font-size:13px;max-width:640px}}
 .grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}}
@@ -687,10 +688,10 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
     <svg class="mark" width="42" height="42" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#566123"></rect><path d="M12 34 L32 18 L52 34" fill="none" stroke="#F4EDDD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 46 H48" fill="none" stroke="#F4EDDD" stroke-width="4" stroke-linecap="round"></path><path d="M16 54 H40" fill="none" stroke="#9B1C2E" stroke-width="4" stroke-linecap="round"></path></svg>
     <span class=wm>olimazi<span class=wd>.online</span></span>
   </div>
-  <div class=right><span class=stamp>Updated {s['generated']}</span><span class=verdict>{verdict}</span></div>
+  <div class=right><a class=navlink href="/manage">Management</a><span class=stamp>Updated {s['generated']}</span><span class=verdict>{verdict}</span></div>
 </nav>
 <div class=hero>
-  <h1>{schedule_label}</h1>
+  <h1>{product_title}<small>{schedule_label}</small></h1>
   <p class=addr>{property_name}</p>
   <p>Reconciled from <code>{tracker_name}</code> &middot; deterministic arithmetic &middot; always matches the spreadsheet.</p>
 </div>
@@ -718,10 +719,10 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
 
 def write_report(s, rep):
     L = []
-    schedule_label = (
-        "Schedule E" if s["tracking_type"] == "rental" else "Schedule C (setup preview)"
-    )
-    L.append(f"# {schedule_label} — Reconciliation Report")
+    schedule_label = "Sch. E" if s["tracking_type"] == "rental" else "Sch. C"
+    product_title = "Rental Manager" if s["tracking_type"] == "rental" else "Business Manager"
+    L.append(f"# {product_title} — {schedule_label}")
+    L.append("## Reconciliation Report")
     L.append(f"**Tracker:** {s['property_name']} · **Generated:** {s['generated']} · "
              f"_Deterministic check — recomputed from raw rows, no model judgment._\n")
     verdict = "RECONCILED" if s["fails"] == 0 else f"{s['fails']} ALERT(S) FOUND"

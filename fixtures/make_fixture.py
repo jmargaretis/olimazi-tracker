@@ -2,6 +2,7 @@
 """Generate the sanitized 12 Sample Street demonstration fixture."""
 
 from datetime import date
+import json
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -14,6 +15,7 @@ HERE = Path(__file__).resolve().parent
 PROPERTY = HERE / "sample-property"
 WORKBOOK = PROPERTY / "sample-tracker.xlsx"
 SOURCE_DOCS = PROPERTY / "source-docs"
+MANAGEMENT = PROPERTY / "management.json"
 
 INK = "2B2A26"
 MUTED = "7D7666"
@@ -523,9 +525,40 @@ def write_source_documents() -> None:
         dangling.unlink()
 
 
+def write_management_store() -> None:
+    """Write fake operational data for the sample property's management page."""
+    data = {
+        "issues": [{
+            "id": "ISSUE-001", "title": "AC outdoor unit dead", "status": "open",
+            "reported": "2026-07-18",
+            "tenant": {"name": "Sam Tenant", "email": "sam.tenant@example.com", "phone": "555-0101"},
+            "vendor": {"name": "Sample HVAC Co", "phone": "555-0142", "email": "dispatch@example.com"},
+            "notes": [
+                {"date": "2026-07-18", "text": "Tenant reports the outdoor unit will not start."},
+                {"date": "2026-07-19", "text": "Vendor contacted for a diagnostic visit."},
+            ],
+            "linked_emails": [
+                {"subject": "AC unit stopped working", "date": "2026-07-18", "folder": "Tenant"},
+                {"subject": "Re: AC unit stopped working", "date": "2026-07-18", "folder": "Sent"},
+                {"subject": "Service request ISSUE-001", "date": "2026-07-19", "folder": "Vendors"},
+            ],
+            "expense_link": "L14",
+        }],
+        "documents": [
+            {"title": "Signed lease renewal", "type": "renewal", "date": "2026-06-01",
+             "source": {"subject": "Signed renewal", "date": "2026-06-01"}},
+            {"title": "Tenant renters policy", "type": "renters-insurance", "date": "2025-07-27",
+             "expires": "2026-07-27",
+             "source": {"subject": "Renters policy certificate", "date": "2025-07-27"}},
+        ],
+    }
+    MANAGEMENT.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
 def build_workbook() -> None:
     PROPERTY.mkdir(parents=True, exist_ok=True)
     write_source_documents()
+    write_management_store()
     wb = Workbook()
     build_income(wb)
     build_expenses(wb)

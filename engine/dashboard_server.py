@@ -32,6 +32,7 @@ ROOT = os.path.dirname(HERE)                      # Sch. E folder
 RECONCILE = os.path.join(HERE, "reconcile.py")
 RECONCILE_ROOT = ROOT
 DASHBOARD = os.path.join(ROOT, "SchE_Dashboard.html")
+MANAGEMENT = os.path.join(ROOT, "SchE_Management.html")
 
 sys.path.insert(0, HERE)
 import reconcile as _rec                           # reuse its tracker discovery
@@ -81,6 +82,9 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in ("/", "/index.html", "/SchE_Dashboard.html"):
             with open(DASHBOARD, "rb") as f:
                 self._send(200, f.read(), "text/html; charset=utf-8")
+        elif self.path in ("/manage", "/SchE_Management.html"):
+            with open(MANAGEMENT, "rb") as f:
+                self._send(200, f.read(), "text/html; charset=utf-8")
         else:
             self._send(404, {"error": "not found"})
 
@@ -103,7 +107,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    global TRACKER, PORT, RECONCILE_ROOT, DASHBOARD
+    global TRACKER, PORT, RECONCILE_ROOT, DASHBOARD, MANAGEMENT
     ap = argparse.ArgumentParser()
     ap.add_argument("--tracker", help="override tracker path (testing)")
     ap.add_argument("--port", type=int, default=PORT)
@@ -112,6 +116,7 @@ def main():
         TRACKER = os.path.abspath(a.tracker)
         RECONCILE_ROOT = os.path.dirname(TRACKER)
         DASHBOARD = os.path.join(RECONCILE_ROOT, "SchE_Dashboard.html")
+        MANAGEMENT = os.path.join(RECONCILE_ROOT, "SchE_Management.html")
     PORT = a.port
     print(f"[dashboard] tracker: {TRACKER}")
     rerun_reconcile()  # fresh dashboard on startup

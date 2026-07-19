@@ -1,0 +1,69 @@
+{
+  "issues": [
+    {
+      "id": "ISSUE-001",
+      "title": "AC outdoor unit dead",
+      "status": "open",
+      "reported": "2026-07-18",
+      "tenant": {
+        "name": "Sam Tenant",
+        "email": "sam.tenant@example.com",
+        "phone": "555-0101"
+      },
+      "vendor": {
+        "name": "Sample HVAC Co",
+        "phone": "555-0142",
+        "email": "dispatch@example.com"
+      },
+      "notes": [
+        {
+          "date": "2026-07-18",
+          "text": "Tenant reports the outdoor unit will not start."
+        },
+        {
+          "date": "2026-07-19",
+          "text": "Vendor contacted for a diagnostic visit."
+        }
+      ],
+      "linked_emails": [
+        {
+          "subject": "AC unit stopped working",
+          "date": "2026-07-18",
+          "folder": "Tenant"
+        },
+        {
+          "subject": "Re: AC unit stopped working",
+          "date": "2026-07-18",
+          "folder": "Sent"
+        },
+        {
+          "subject": "Service request ISSUE-001",
+          "date": "2026-07-19",
+          "folder": "Vendors"
+        }
+      ],
+      "expense_link": "L14"
+    }
+  ],
+  "documents": [
+    {
+      "title": "Signed lease renewal",
+      "type": "renewal",
+      "date": "2026-06-01",
+      "source": {
+        "subject": "Signed renewal",
+        "date": "2026-06-01"
+      }
+    },
+    {
+      "title": "Tenant renters policy",
+      "type": "renters-insurance",
+      "date": "2025-07-27",
+      "expires": "2026-07-27",
+      "source": {
+        "subject": "Renters policy certificate",
+        "date": "2025-07-27"
+      }
+    }
+  ]
+}

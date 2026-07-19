@@ -73,7 +73,8 @@ Keep the blue PowerShell window open and complete these steps in order.
    Start-Process "fixtures\sample-property\SchE_Dashboard.html"
    ```
 
-4. Your normal web browser should open a page titled **Schedule E** for
+4. Your normal web browser should open a page titled **Rental Manager** with
+   **Sch. E** subtext for
    **12 Sample Street**. The red **1 ALERT(S)** badge proves the sample check ran.
 
 ## Try the live dashboard (optional)
