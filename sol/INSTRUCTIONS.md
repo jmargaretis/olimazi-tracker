@@ -1,54 +1,64 @@
 # SOL work packet — active
 
-**Packet:** tracker-#6 · issued 2026-07-19 · authored by Claude (planning side)
+**Packet:** tracker-#7 · issued 2026-07-19 · authored by Claude (planning side)
 **Protocol:** see `AGENTS.md`; report in the required REPORT.md format.
 
-**Packet tracker-#5 (fixture dashboard): ACCEPTED** — commit 7cb284a. Live demo
-passed: sample dashboard served, Resolve write-back verified with guardrails held.
+**Packet tracker-#6 (whole-dollar, grand total, ALERTS): ACCEPTED** — commit 433a19c.
+Note: John reordered the queue — this Management page ships BEFORE the client
+organizer packets A & B.
 
-## Packet tracker-#6 scope
+## Packet tracker-#7 scope — Property Management page (page 3)
 
-### 1. Whole-dollar display
-`money()` in `engine/reconcile.py` (line ~129) renders cents (`${x:,.2f}`).
-Change DISPLAY ONLY to whole dollars (`${x:,.0f}`, standard rounding) everywhere
-amounts render — reconciliation report, dashboard, verdict lines. All arithmetic,
-comparisons, and the `CENTS` tolerance stay at full precision; only formatting
-changes. Stored numeric values (e.g. `total_expenses` in JSON output) keep cents.
+A third page alongside the reconciliation dashboard: operational management of the
+rental — tenant issues, work/repair tracking, and lease/insurance documents.
 
-### 2. Grand total line
-Add a **Grand total** line at the bottom of the line-item table in BOTH the
-generated `SchE_Reconciliation.md` and the dashboard: net result = Line 3 rents
-received minus Line 20 total expenses, bolded, whole-dollar display per §1.
-Label it exactly `Grand total (L3 − L20)`.
+### 1. Data store: `management.json` in the property folder
+One JSON file next to the tracker workbook (same per-property pattern as
+`reconciliation.json`). Schema:
+- `issues[]`: id, title, status (`open`/`scheduled`/`resolved`), reported (date),
+  tenant {name, email, phone}, vendor {name, phone, email}, notes[] (dated),
+  linked_emails[] (subject, date, folder), expense_link (optional, e.g. "L14").
+- `documents[]`: title, type (`lease`/`renewal`/`renters-insurance`/`other`),
+  date, expires (optional date), source (email subject/date or file path).
+Seed the SAMPLE fixture's `management.json` with realistic fake data modeled on the
+real case: one open issue ("AC outdoor unit dead", tenant Sam Tenant, vendor
+"Sample HVAC Co", reported 2026-07-18, 3 linked emails) and two documents (a signed
+lease renewal; a renters policy with `expires` ~1 week out). Do NOT put real names,
+emails, or phone numbers in the fixture — sample data only.
 
-### 3. BREAK → ALERTS rename
-Rename the verdict terminology everywhere a human sees it:
-- `engine/reconcile.py` lines ~529 and ~726: `N BREAK(S)` → `N ALERT(S)`,
-  `N BREAK(S) FOUND` → `N ALERT(S) FOUND`.
-- Any dashboard badge text/CSS class or title derived from it.
-- `docs/SETUP.md` line ~77 promises testers "The red **1 BREAK(S)** badge" —
-  update to ALERT(S) in the SAME packet so docs never drift from the product.
-Internal variable names (`fails` etc.) may stay; this is user-facing wording.
+### 2. Generator: `engine/management_page.py`
+Reads `management.json`, writes `SchE_Management.html` in the same folder. Match the
+existing dashboard's visual style (same palette/fonts/card layout as
+`write_dashboard` output). Sections:
+1. **Issues board** — open issues first: title, status chip, reported date, tenant,
+   vendor (with phone), dated notes, linked-email list. Resolved collapse below.
+2. **Documents** — table with type, date, and `expires`; any document expiring
+   within 30 days gets a highlighted "Upcoming" badge (e.g. the sample renters
+   policy renewal).
+Static generation only — page rendering makes NO network or mailbox calls. Email
+linking is done upstream (Claude proposes entries into `management.json`); the page
+just renders the store.
 
-### 4. Regenerate the sample fixture
-After §1–§3, regenerate so committed sample outputs match the code:
-1. `python fixtures/make_fixture.py`
-2. `python engine/reconcile.py fixtures/sample-property`
-Commit the regenerated outputs. Do NOT commit `engine/intake_state.json` or any
-`*.pre-resolve-backup.xlsx` (now gitignored — machine-specific/personal data).
+### 3. Serving
+`dashboard_server.py`: add route `/manage` that serves the property folder's
+`SchE_Management.html` (honoring `--tracker` the same way `/` does). Add a small
+"Management" link in the dashboard header and a "Dashboard" link back from the
+management page.
 
-### 5. Acceptance test (put results in REPORT.md)
-1. Fresh fixture + reconcile per §4.
-2. Confirm `SchE_Reconciliation.md` shows whole-dollar amounts, the
-   `Grand total (L3 − L20)` line, and `ALERT(S)` verdict wording.
-3. `python engine/dashboard_server.py --tracker fixtures/sample-property/sample-tracker.xlsx --port 8745`
-   → dashboard shows whole dollars, grand total line, red ALERT(S) badge.
-4. `grep -ri "BREAK" engine/ docs/ fixtures/sample-property/` returns nothing
-   user-facing (generated outputs and docs are clean).
-5. Confirm reconcile arithmetic unchanged: same pass/fail results as before the
-   packet on the sample fixture (only wording/formatting moved).
+### 4. Acceptance test (put results in REPORT.md)
+1. `python fixtures/make_fixture.py` then `python engine/reconcile.py fixtures/sample-property`
+   (must be unaffected — byte-identical reconciliation outputs).
+2. `python engine/management_page.py fixtures/sample-property` produces
+   `SchE_Management.html` with the seeded issue and documents; renters-policy row
+   shows the "Upcoming" badge.
+3. `python engine/dashboard_server.py --tracker fixtures/sample-property/sample-tracker.xlsx --port 8745`:
+   GET `/` still serves the dashboard; GET `/manage` serves the management page;
+   header links work both ways.
+4. Confirm no real personal data anywhere in committed files (grep for
+   "Shin", "Wise Owl", "southcountyair", "scottshin" — all must be absent).
 
 ## Out of scope
-- Client Organizer page and typed-entry form (future packets A & B).
-- Any change to reconcile arithmetic, intake, matcher, or tolerances.
-- New dependencies; this file.
+- Automatic email fetching/linking (Claude-side via MCP, not this repo).
+- Editing issues from the page (read-only render this packet; write-backs later).
+- The client organizer pages (packets A & B, still queued).
+- Any change to reconcile arithmetic or the Resolve flow; new dependencies; this file.
