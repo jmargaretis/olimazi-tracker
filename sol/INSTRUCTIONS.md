@@ -7,10 +7,25 @@
 Note: John reordered the queue — this Management page ships BEFORE the client
 organizer packets A & B.
 
-## Packet tracker-#7 scope — Property Management page (page 3)
+## Packet tracker-#7 scope — Property Management page (page 3) + product rename
 
 A third page alongside the reconciliation dashboard: operational management of the
 rental — tenant issues, work/repair tracking, and lease/insurance documents.
+
+### 0. Product rename (added 2026-07-19, John's call)
+Rename the user-facing product title everywhere it renders:
+- Dashboard, management page, and report titles: **"Rental Manager"** as the main
+  title with **"Sch. E"** as smaller subtext beneath/beside it (e.g. an h1 with a
+  muted smaller-font span). Replace title-position uses of "Schedule E" /
+  "Sch. E Dashboard" accordingly. Keep tax-line references in the BODY (e.g.
+  "Schedule E line 14") unchanged — the rename is branding, not terminology.
+- `docs/SETUP.md`: update the page-title promise ("a page titled **Schedule E**"
+  → "a page titled **Rental Manager**") and any other title references.
+- Naming convention for the future (record in README or a comment, no code):
+  the Sch. C counterpart, when built, is titled **"Business Manager"** with
+  "Sch. C" subtext. Nothing to build for Sch. C in this packet.
+- Add to the acceptance test: GET `/` and `/manage` page titles show
+  "Rental Manager" with "Sch. E" subtext; grep confirms SETUP.md updated.
 
 ### 1. Data store: `management.json` in the property folder
 One JSON file next to the tracker workbook (same per-property pattern as
