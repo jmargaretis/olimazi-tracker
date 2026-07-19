@@ -1,4 +1,4 @@
-# SOL operating contract
+# Codex operating contract (formerly "SOL")
 
 Same protocol as `olimazi-online`:
 
@@ -25,7 +25,7 @@ Repo-specific rules:
 Every report uses exactly these sections, in this order. Write "None" under a section rather than omitting it — the reviewer checks your claims against the diff, so a missing section reads as a hidden change.
 
 ```markdown
-# SOL completion report — packet #N
+# Codex completion report — packet #N
 
 ## Status
 COMPLETE | PARTIAL | BLOCKED — one line of summary.
