@@ -1,44 +1,54 @@
 # SOL work packet — active
 
-**Packet:** tracker-#5 · issued 2026-07-18 · authored by Claude (planning side)
+**Packet:** tracker-#6 · issued 2026-07-19 · authored by Claude (planning side)
 **Protocol:** see `AGENTS.md`; report in the required REPORT.md format.
 
-**Packet tracker-#4 (packaging): ACCEPTED** — v0.1.0 released. This packet fixes a
-limitation found while demoing: the dashboard server cannot run against the sample
-fixture, so the Resolve write-back cannot be demonstrated without real books.
+**Packet tracker-#5 (fixture dashboard): ACCEPTED** — commit 7cb284a. Live demo
+passed: sample dashboard served, Resolve write-back verified with guardrails held.
 
-## Packet tracker-#5 scope
+## Packet tracker-#6 scope
 
-### 1. Make `engine/dashboard_server.py` honor `--tracker` fully
-Today `--tracker` overrides the workbook path for writes, but:
-- `rerun_reconcile()` always reconciles the repo root (`RECONCILE ROOT`), ignoring
-  the tracker override, and
-- `DASHBOARD` is hard-coded to `ROOT/SchE_Dashboard.html`.
+### 1. Whole-dollar display
+`money()` in `engine/reconcile.py` (line ~129) renders cents (`${x:,.2f}`).
+Change DISPLAY ONLY to whole dollars (`${x:,.0f}`, standard rounding) everywhere
+amounts render — reconciliation report, dashboard, verdict lines. All arithmetic,
+comparisons, and the `CENTS` tolerance stay at full precision; only formatting
+changes. Stored numeric values (e.g. `total_expenses` in JSON output) keep cents.
 
-Fix: when `--tracker` is given, derive the property folder from the tracker's
-directory — reconcile THAT folder and serve THAT folder's `SchE_Dashboard.html`.
-Behavior with no `--tracker` stays byte-for-byte what it is now (the real Sch. E
-layout must be unaffected).
+### 2. Grand total line
+Add a **Grand total** line at the bottom of the line-item table in BOTH the
+generated `SchE_Reconciliation.md` and the dashboard: net result = Line 3 rents
+received minus Line 20 total expenses, bolded, whole-dollar display per §1.
+Label it exactly `Grand total (L3 − L20)`.
 
-### 2. Acceptance test (put results in REPORT.md)
-1. `python fixtures/make_fixture.py` (fresh fixture)
+### 3. BREAK → ALERTS rename
+Rename the verdict terminology everywhere a human sees it:
+- `engine/reconcile.py` lines ~529 and ~726: `N BREAK(S)` → `N ALERT(S)`,
+  `N BREAK(S) FOUND` → `N ALERT(S) FOUND`.
+- Any dashboard badge text/CSS class or title derived from it.
+- `docs/SETUP.md` line ~77 promises testers "The red **1 BREAK(S)** badge" —
+  update to ALERT(S) in the SAME packet so docs never drift from the product.
+Internal variable names (`fails` etc.) may stay; this is user-facing wording.
+
+### 4. Regenerate the sample fixture
+After §1–§3, regenerate so committed sample outputs match the code:
+1. `python fixtures/make_fixture.py`
 2. `python engine/reconcile.py fixtures/sample-property`
-3. `python engine/dashboard_server.py --tracker fixtures/sample-property/sample-tracker.xlsx --port 8745`
-4. GET http://127.0.0.1:8745/ serves the SAMPLE dashboard (title "12 Sample
-   Street").
-5. Click/POST a Resolve on one open Review row: Review!E<row> updates in
-   `sample-tracker.xlsx`, a pre-write backup appears next to it, reconcile re-runs,
-   and the dashboard refresh shows the item resolved.
-6. Confirm the guardrails held: only column E of an open Review row changed —
-   nothing else in the workbook.
+Commit the regenerated outputs. Do NOT commit `engine/intake_state.json` or any
+`*.pre-resolve-backup.xlsx` (now gitignored — machine-specific/personal data).
 
-### 3. Docs touch-up
-Add a short "Try the live dashboard (optional)" section to `docs/SETUP.md` after
-the smoke test, using the exact command from step 3 above. Keep the same
-non-technical tone as the rest of the guide.
+### 5. Acceptance test (put results in REPORT.md)
+1. Fresh fixture + reconcile per §4.
+2. Confirm `SchE_Reconciliation.md` shows whole-dollar amounts, the
+   `Grand total (L3 − L20)` line, and `ALERT(S)` verdict wording.
+3. `python engine/dashboard_server.py --tracker fixtures/sample-property/sample-tracker.xlsx --port 8745`
+   → dashboard shows whole dollars, grand total line, red ALERT(S) badge.
+4. `grep -ri "BREAK" engine/ docs/ fixtures/sample-property/` returns nothing
+   user-facing (generated outputs and docs are clean).
+5. Confirm reconcile arithmetic unchanged: same pass/fail results as before the
+   packet on the sample fixture (only wording/formatting moved).
 
 ## Out of scope
-- The Client Organizer page and typed-entry form (specced separately; future
-  packets).
-- Any change to reconcile arithmetic, intake, or the matcher.
+- Client Organizer page and typed-entry form (future packets A & B).
+- Any change to reconcile arithmetic, intake, matcher, or tolerances.
 - New dependencies; this file.

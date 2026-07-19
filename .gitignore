@@ -1,3 +1,7 @@
 __pycache__/
 *.py[cod]
 dist/
+
+# Machine-specific runtime state (personal paths) - never commit
+engine/intake_state.json
+*.pre-resolve-backup.xlsx
