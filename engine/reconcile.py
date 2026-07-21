@@ -688,7 +688,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
     <svg class="mark" width="42" height="42" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#566123"></rect><path d="M12 34 L32 18 L52 34" fill="none" stroke="#F4EDDD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 46 H48" fill="none" stroke="#F4EDDD" stroke-width="4" stroke-linecap="round"></path><path d="M16 54 H40" fill="none" stroke="#9B1C2E" stroke-width="4" stroke-linecap="round"></path></svg>
     <span class=wm>olimazi<span class=wd>.online</span></span>
   </div>
-  <div class=right><a class=navlink href="/manage">Management</a><span class=stamp>Updated {s['generated']}</span><span class=verdict>{verdict}</span></div>
+  <div class=right><a class=navlink href="/">Dashboard</a><a class=navlink href="/manage">Management</a><a class=navlink href="/organizer">Organizer</a><span class=stamp>Updated {s['generated']}</span><span class=verdict>{verdict}</span></div>
 </nav>
 <div class=hero>
   <h1>{product_title}<small>{schedule_label}</small></h1>

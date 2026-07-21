@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-19",
+  "generated": "2026-07-21",
   "profile": {
     "name": "12 Sample Street",
     "type": "rental",
@@ -22,7 +22,49 @@
       18,
       19
     ],
-    "engine_support": "schedule_e"
+    "engine_support": "schedule_e",
+    "owner": {
+      "name": "Sam Owner",
+      "emails": [
+        "sam@example.com"
+      ]
+    },
+    "preparer": {
+      "name": "Pat Preparer",
+      "firm": "Sample Tax Co",
+      "email": "pat@example.com",
+      "phone": "555-0177"
+    },
+    "filing": {
+      "tax_year": 2025,
+      "on_extension": false,
+      "extension_by_default": false,
+      "estimated_payments_made": false,
+      "books_closed_through": "April",
+      "fair_rental_days": 120,
+      "personal_use_days": 0,
+      "depreciation_booked": false,
+      "made_1099_payments": null,
+      "will_file_1099s": null
+    },
+    "properties": [
+      {
+        "address": "12 Sample Street",
+        "type": "Single-family rental",
+        "ownership_pct": 100,
+        "in_service_date": "2024-01-01"
+      }
+    ],
+    "confirmed": {
+      "owner.name": "2026-07-20",
+      "owner.emails": "2026-07-20",
+      "preparer.name": "2026-07-20",
+      "preparer.firm": "2026-07-20",
+      "preparer.email": "2026-07-20",
+      "preparer.phone": "2026-07-20",
+      "filing.tax_year": "2026-07-20",
+      "properties.0.address": "2026-07-20"
+    }
   },
   "property_name": "12 Sample Street",
   "tracking_type": "rental",
