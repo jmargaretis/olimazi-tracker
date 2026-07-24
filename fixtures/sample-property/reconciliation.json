@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-21",
+  "generated": "2026-07-23",
   "profile": {
     "name": "12 Sample Street",
     "type": "rental",
@@ -138,6 +138,198 @@
       "note": "Confirm the negative repair contra treatment with the preparer."
     }
   ],
+  "line_traces": {
+    "9": [
+      {
+        "line": 9,
+        "date": "2026-01-10 00:00:00",
+        "vendor": "Sample Mutual",
+        "description": "Annual landlord policy",
+        "amount": 1200.0,
+        "source": "source-docs/sample-insurance-policy.txt",
+        "status": "Paid"
+      }
+    ],
+    "10": [
+      {
+        "line": 10,
+        "date": "2026-01-22 00:00:00",
+        "vendor": "Example Tax Services",
+        "description": "Bookkeeping setup consultation",
+        "amount": 350.0,
+        "source": "source-docs/bookkeeping-consult.txt",
+        "status": "Paid"
+      }
+    ],
+    "14": [
+      {
+        "line": 14,
+        "date": "2026-02-08 00:00:00",
+        "vendor": "Sample Plumber",
+        "description": "Repair leaking kitchen supply line \u2014 Claim SAMPLE-001",
+        "amount": 625.0,
+        "source": "source-docs/plumbing-invoice.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-02-12 00:00:00",
+        "vendor": "Anytown Hardware",
+        "description": "Paint and patch supplies",
+        "amount": 210.0,
+        "source": "source-docs/hardware-receipt.txt",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-03-20 00:00:00",
+        "vendor": "Sample Mutual",
+        "description": "Insurance reimbursement proceeds \u2014 Claim SAMPLE-001",
+        "amount": -300.0,
+        "source": "source-docs/reimbursement-notice.pdf",
+        "status": "Received"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-20 00:00:00",
+        "vendor": "Sample Gardener",
+        "description": "Spring yard cleanup",
+        "amount": 180.0,
+        "source": "source-docs/missing-gardener-invoice.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-05 00:00:00",
+        "vendor": "Sample Locksmith",
+        "description": "Replace rear-entry lock",
+        "amount": 95.0,
+        "source": "",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-10 00:00:00",
+        "vendor": "Sample Electric",
+        "description": "Replace porch light fixture",
+        "amount": 145.0,
+        "source": "",
+        "status": "Paid"
+      }
+    ],
+    "16": [
+      {
+        "line": 16,
+        "date": "2026-03-01 00:00:00",
+        "vendor": "Anytown County",
+        "description": "First property-tax installment",
+        "amount": 950.0,
+        "source": "source-docs/property-tax-receipt.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 16,
+        "date": "2026-03-15 00:00:00",
+        "vendor": "Anytown County",
+        "description": "Rental registration assessment",
+        "amount": 400.0,
+        "source": "source-docs/registration-assessment.txt",
+        "status": "Paid"
+      }
+    ],
+    "20": [
+      {
+        "line": 9,
+        "date": "2026-01-10 00:00:00",
+        "vendor": "Sample Mutual",
+        "description": "Annual landlord policy",
+        "amount": 1200.0,
+        "source": "source-docs/sample-insurance-policy.txt",
+        "status": "Paid"
+      },
+      {
+        "line": 10,
+        "date": "2026-01-22 00:00:00",
+        "vendor": "Example Tax Services",
+        "description": "Bookkeeping setup consultation",
+        "amount": 350.0,
+        "source": "source-docs/bookkeeping-consult.txt",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-02-08 00:00:00",
+        "vendor": "Sample Plumber",
+        "description": "Repair leaking kitchen supply line \u2014 Claim SAMPLE-001",
+        "amount": 625.0,
+        "source": "source-docs/plumbing-invoice.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-02-12 00:00:00",
+        "vendor": "Anytown Hardware",
+        "description": "Paint and patch supplies",
+        "amount": 210.0,
+        "source": "source-docs/hardware-receipt.txt",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-03-20 00:00:00",
+        "vendor": "Sample Mutual",
+        "description": "Insurance reimbursement proceeds \u2014 Claim SAMPLE-001",
+        "amount": -300.0,
+        "source": "source-docs/reimbursement-notice.pdf",
+        "status": "Received"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-20 00:00:00",
+        "vendor": "Sample Gardener",
+        "description": "Spring yard cleanup",
+        "amount": 180.0,
+        "source": "source-docs/missing-gardener-invoice.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-05 00:00:00",
+        "vendor": "Sample Locksmith",
+        "description": "Replace rear-entry lock",
+        "amount": 95.0,
+        "source": "",
+        "status": "Paid"
+      },
+      {
+        "line": 14,
+        "date": "2026-04-10 00:00:00",
+        "vendor": "Sample Electric",
+        "description": "Replace porch light fixture",
+        "amount": 145.0,
+        "source": "",
+        "status": "Paid"
+      },
+      {
+        "line": 16,
+        "date": "2026-03-01 00:00:00",
+        "vendor": "Anytown County",
+        "description": "First property-tax installment",
+        "amount": 950.0,
+        "source": "source-docs/property-tax-receipt.pdf",
+        "status": "Paid"
+      },
+      {
+        "line": 16,
+        "date": "2026-03-15 00:00:00",
+        "vendor": "Anytown County",
+        "description": "Rental registration assessment",
+        "amount": 400.0,
+        "source": "source-docs/registration-assessment.txt",
+        "status": "Paid"
+      }
+    ]
+  },
   "line3_rents_ytd": 7150.0,
   "line9_insurance": 1200.0,
   "line10_professional": 350.0,

@@ -129,6 +129,11 @@ def money(x):
     return f"${x:,.0f}"
 
 
+def trace_money(x):
+    """Currency display for transaction traces, where cents must remain visible."""
+    return f"-${abs(x):,.2f}" if x < 0 else f"${x:,.2f}"
+
+
 def num(v):
     try:
         return float(v)
@@ -218,6 +223,27 @@ def read_expenses(ws):
     return rows
 
 
+def build_line_traces(erows):
+    """Group the current Expenses rows by their Schedule E line."""
+    traces = {}
+    for expense in erows:
+        line = expense["line"]
+        if line is None:
+            continue
+        traces.setdefault(line, []).append({
+            "line": line,
+            "date": expense["date"],
+            "vendor": str(expense["vendor"]),
+            "description": str(expense["desc"]),
+            "amount": round(expense["paid"], 2),
+            "source": str(expense["file_ref"]),
+            "status": str(expense["status"]),
+        })
+    traces[20] = [component for line, components in traces.items()
+                  if line != 20 for component in components]
+    return traces
+
+
 # ---- checks -------------------------------------------------------------
 class Report:
     def __init__(self):
@@ -272,6 +298,7 @@ def main():
         if e["line"] is not None:
             by_line.setdefault(e["line"], 0.0)
             by_line[e["line"]] += e["paid"]
+    line_traces = build_line_traces(erows)
     line9 = by_line.get(9, 0.0)
     line10 = by_line.get(10, 0.0)
     line14 = by_line.get(14, 0.0)
@@ -388,6 +415,8 @@ def main():
         "open_items": open_items,
         "anticipated": anticipated,
         "accountant_review": acct_flags,
+        "line_traces": {str(line): components
+                        for line, components in sorted(line_traces.items())},
         "line3_rents_ytd": round(line3, 2),
         "line9_insurance": round(line9, 2),
         "line10_professional": round(line10, 2),
@@ -558,6 +587,61 @@ def write_dashboard(s, rep):
             f"<td class='num'>{money(value)}</td></tr>"
         )
 
+    line_labels = {
+        5: "Advertising", 6: "Auto and travel", 7: "Cleaning and maintenance",
+        8: "Commissions", 9: "Insurance", 10: "Professional fees",
+        11: "Management fees", 12: "Mortgage interest", 13: "Other interest",
+        14: "Repairs", 15: "Supplies", 16: "Taxes", 17: "Utilities",
+        18: "Depreciation", 19: "Other", 20: "Total expenses",
+    }
+
+    def line_trace_row(line, components):
+        total = round(sum(component["amount"] for component in components), 2)
+        gross = round(sum(component["amount"] for component in components
+                          if component["amount"] >= 0), 2)
+        contra = round(sum(component["amount"] for component in components
+                           if component["amount"] < 0), 2)
+        component_rows = []
+        for component in components:
+            amount = component["amount"]
+            amount_class = "num contra-amount" if amount < 0 else "num"
+            source = escape(component["source"]) if component["source"] else "No file linked"
+            component_rows.append(
+                f"<tr class='trace-component' data-amount='{amount:.2f}'>"
+                f"<td>{escape(component['date'])}</td>"
+                f"<td><b>L{component['line']} &middot; {escape(component['vendor'])}</b><br>"
+                f"<span class=trace-desc>{escape(component['description'])}</span></td>"
+                f"<td class='{amount_class}'>{trace_money(amount)}</td>"
+                f"<td><code>{source}</code></td>"
+                f"<td><span class='status-pill'>{escape(component['status'])}</span></td></tr>"
+            )
+        breakdown = ""
+        if contra:
+            breakdown = (
+                f"<div class=trace-math>Gross {trace_money(gross)} "
+                f"<span class=contra-amount>+ contra {trace_money(contra)}</span> "
+                f"= <b>net {trace_money(total)}</b></div>"
+            )
+        return (
+            f"<details class=line-trace data-line='{line}' data-total='{total:.2f}'>"
+            f"<summary><span><b>Line {line}</b> &middot; "
+            f"{line_labels.get(line, 'Expense')}</span>"
+            f"<span class=num>{trace_money(total)}</span></summary>"
+            f"<div class=trace-wrap><table class=trace-table>"
+            f"<thead><tr><th>Date</th><th>Vendor / description</th>"
+            f"<th class=num>Amount</th><th>Source document</th><th>Status</th></tr></thead>"
+            f"<tbody>{''.join(component_rows)}</tbody></table>"
+            f"{breakdown}<div class=trace-net data-net='{total:.2f}'>"
+            f"Expanded net <b>{trace_money(total)}</b></div></div></details>"
+        )
+
+    line_trace_html = "".join(
+        line_trace_row(int(line), components)
+        for line, components in sorted(
+            s.get("line_traces", {}).items(), key=lambda item: int(item[0])
+        )
+    )
+
     rows = "\n".join(
         dashboard_row(lbl, val)
         for lbl, val in [
@@ -669,6 +753,19 @@ tr:last-child td{{border-bottom:none}}
 .corrected td{{font-weight:700;color:var(--crimson)}} .tag{{font-size:10px;background:#f1e3d2;color:var(--crimson);padding:1px 6px;border-radius:6px;font-weight:600}}
 .booked td{{font-weight:800}}
 .inactive{{opacity:.42}}
+.line-trace-card{{margin-top:18px}}
+.line-trace{{border-bottom:1px solid var(--sand)}}
+.line-trace:last-child{{border-bottom:none}}
+.line-trace summary{{display:flex;justify-content:space-between;gap:16px;padding:11px 4px;cursor:pointer;list-style-position:inside}}
+.line-trace summary:focus-visible{{outline:3px solid var(--olive);outline-offset:3px;border-radius:5px}}
+.trace-wrap{{padding:0 4px 12px 22px;overflow-x:auto}}
+.trace-table{{font-size:12px;min-width:680px}}
+.trace-table th{{text-align:left;color:var(--muted);padding:6px 4px;border-bottom:2px solid var(--sand)}}
+.trace-table td{{vertical-align:top;padding:7px 4px}}
+.trace-desc{{color:var(--muted)}} .contra-amount{{color:var(--crimson)}}
+.status-pill{{display:inline-block;background:#e7ecd6;color:#404a18;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}}
+.trace-math,.trace-net{{text-align:right;padding-top:9px;font-size:12px}}
+.trace-net{{font-size:13px}}
 .chip{{background:#fff;border:1px solid var(--sand);border-radius:12px;padding:10px 12px;margin-bottom:10px}}
 .chip-t{{font-weight:700;font-size:14px}} .chip-d{{font-size:12px;color:var(--muted);margin-top:2px}}
 ul.checks{{list-style:none;padding:0;margin:0;font-size:13px}}
@@ -703,6 +800,9 @@ footer{{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}}
       <tr class=booked><td>Grand total (L3 − L20)</td><td class=num>{money(s['line3_rents_ytd'] - s['total_expenses'])}</td></tr>
     </table></div>
   <div class=card><h2>Open items ({len(open_unres)})</h2>{chip_html}</div>
+</div>
+<div class="card line-trace-card"><h2>{schedule_label} line trace</h2>
+  {line_trace_html}
 </div>
 {anticipated_html}
 <div class=card style="margin-top:18px"><h2>Flagged for accountant review ({len(s.get('accountant_review', []))})</h2>
